@@ -63,6 +63,43 @@ namespace compilation
 
         Assert.Equal(expected, actual);
     }
+    
+    [Fact]
+    public void TestAutoArgs()
+    {
+        var source = @"
+using SourceGenerator.Common;
+
+namespace SourceGenerator.Demo
+{
+    public partial class UserClass
+    {
+        [Args]
+        private string _test;
+
+        [Args]
+        private string _test2, _test3;
+    }
+}";
+        var expected = @"// Auto-generated code
+
+namespace SourceGenerator.Demo
+{
+    public partial class UserClass
+    {
+        public UserClass(string test, string test2, string test3)
+        {
+            this._test = test;
+            this._test2 = test2;
+            this._test3 = test3;
+        }
+    }
+}";
+
+        var actual = Run<AutoArgsGenerator>(source);
+
+        Assert.Equal(expected, actual);
+    }
 
     private static string Run<T>(string source) where T : ISourceGenerator, new()
     {

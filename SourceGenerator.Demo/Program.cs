@@ -4,9 +4,10 @@ class Program
 {
     static void Main(string[] args)
     {
-        var x = new UserClass();
-        Console.WriteLine(x.Test);
-        Console.WriteLine(x.Test2);
+        var autoPropertyClass = new AutoPropertyClass();
+        Console.WriteLine(autoPropertyClass.Test);
+        Console.WriteLine(autoPropertyClass.Test2);
         Console.WriteLine(AppSettings.Test3);
+        var autoArgsClass = new AutoArgsClass("test", "test2");
     }
 }

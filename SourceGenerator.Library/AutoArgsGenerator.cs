@@ -1,19 +1,19 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SourceGenerator.Common;
 using SourceGenerator.Library.Template;
 
 namespace SourceGenerator.Library
 {
     [Generator]
-    public class AutoPropertyGenerator : ISourceGenerator
+    public class AutoArgsGenerator : ISourceGenerator
     {
         public void Initialize(GeneratorInitializationContext context)
         {
             context.RegisterForSyntaxNotifications(() =>
-                new FieldAttributeReceiver(new List<string> { nameof(PropertyAttribute), PropertyAttribute.Name }));
+                new FieldAttributeReceiver(new List<string> { nameof(ArgsAttribute), ArgsAttribute.Name }));
         }
 
         public void Execute(GeneratorExecutionContext context)
@@ -58,7 +58,7 @@ namespace SourceGenerator.Library
                     }
                 }
 
-                var autoProperty = new AutoProperty(model);
+                var autoProperty = new AutoArgs(model);
 
                 context.AddSource($"{model.Class}.g.cs", autoProperty.TransformText());
             }

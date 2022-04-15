@@ -2,7 +2,7 @@
 
 namespace SourceGenerator.Demo;
 
-public partial class UserClass
+public partial class AutoPropertyClass
 {
     [Property] private string _test = "test";
 

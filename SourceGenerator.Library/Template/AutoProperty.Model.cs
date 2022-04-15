@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
-
-namespace SourceGenerator.Library.Template
+﻿namespace SourceGenerator.Library.Template
 {
     public partial class AutoProperty
     {
-        private readonly AutoPropertyModel Model;
+        private readonly ClassModel Model;
 
-        public AutoProperty(AutoPropertyModel model)
+        public AutoProperty(ClassModel model)
         {
             this.Model = model;
         }
@@ -15,21 +13,5 @@ namespace SourceGenerator.Library.Template
         {
             return char.ToUpper(column.Name[1]) + column.Name.Substring(2);
         }
-    }
-
-    public class AutoPropertyModel
-    {
-        public string Namespace { get; set; }
-
-        public string Class { get; set; }
-
-        public List<Field> Fields { get; set; }
-    }
-
-    public class Field
-    {
-        public string Type { get; set; }
-
-        public string Name { get; set; }
     }
 }

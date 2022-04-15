@@ -1,0 +1,25 @@
+﻿<#@ template language="C#" #>
+<#@ output encoding="utf-8" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Linq" #>
+// Auto-generated code
+
+namespace <#= Model.Namespace #>
+{
+    public partial class <#= Model.Class #>
+    {
+        public <#= Model.Class #>(<#=
+                string.Join(", ", Model.Fields.Select(m => m.Type + " " + StringUtils.ToCamelCase(m.Name))) #>)
+        {
+<#
+    foreach (var field in Model.Fields)
+    {
+#>
+            this.<#= field.Name #> = <#= StringUtils.ToCamelCase(field.Name) #>;
+<#
+    }
+#>
+        }
+    }
+}

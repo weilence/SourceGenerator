@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
-		<Version>0.0.2.3</Version>
+		<Version>0.0.3</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -17,10 +17,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\SourceGenerator.Common\SourceGenerator.Common.csproj" PrivateAssets="all" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
 	</ItemGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
@@ -45,26 +41,38 @@
 
 		<None Include="$(PkgSystem_CodeDom)\lib\netstandard2.0\*.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
 		<None Include="$(PkgSystem_Text_Json)\lib\netstandard2.0\*.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-		<None Update="Template\AutoProperty.tt">
-		  <Generator>TextTemplatingFilePreprocessor</Generator>
-		  <LastGenOutput>AutoProperty.cs</LastGenOutput>
-		</None>
-
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Update="Template\AppSettings.cs">
-			<DesignTime>True</DesignTime>
-			<AutoGen>True</AutoGen>
-			<DependentUpon>AppSettings.tt</DependentUpon>
-		</Compile>
+		<Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
 		<None Update="Template\AppSettings.tt">
 			<Generator>TextTemplatingFilePreprocessor</Generator>
 			<LastGenOutput>AppSettings.cs</LastGenOutput>
 		</None>
-		<Compile Update="Template\AutoProperty.cs">
-		  <DesignTime>True</DesignTime>
+		<None Update="Template\AutoProperty.tt">
+			<Generator>TextTemplatingFilePreprocessor</Generator>
+			<LastGenOutput>AutoProperty.cs</LastGenOutput>
+		</None>
+		<None Update="Template\AutoArgs.tt">
+			<Generator>TextTemplatingFilePreprocessor</Generator>
+			<LastGenOutput>AutoArgs.cs</LastGenOutput>
+		</None>
+		<Compile Update="Template\AutoArgs.cs">
 		  <AutoGen>True</AutoGen>
+		  <DesignTime>True</DesignTime>
+		  <DependentUpon>AutoArgs.tt</DependentUpon>
+		</Compile>
+		<Compile Update="Template\AppSettings.cs">
+		  <DependentUpon>AppSettings.tt</DependentUpon>
+		</Compile>
+		<Compile Update="Template\AutoArgs.cs">
+		  <AutoGen>True</AutoGen>
+		  <DesignTime>True</DesignTime>
+		  <DependentUpon>AutoArgs.tt</DependentUpon>
+		</Compile>
+		<Compile Update="Template\AutoProperty.cs">
+		  <AutoGen>True</AutoGen>
+		  <DesignTime>True</DesignTime>
 		  <DependentUpon>AutoProperty.tt</DependentUpon>
 		</Compile>
 	</ItemGroup>

@@ -12,7 +12,7 @@ namespace <#= Model.Namespace #>
     foreach (var field in Model.Fields)
     {
 #>
-        public <#= field.Type #> <#= GetPropertyName(field) #> { get => <#= field.Name #>; set => <#= field.Name #> = value; }
+        public <#= field.Type #> <#= StringUtils.ToPascalCase(field.Name) #> { get => <#= field.Name #>; set => <#= field.Name #> = value; }
 <#
     }
 #>
