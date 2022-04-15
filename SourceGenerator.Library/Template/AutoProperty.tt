@@ -1,0 +1,20 @@
+<#@ template language="C#" #>
+<#@ output encoding="utf-8" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+// Auto-generated code
+
+namespace <#= Model.Namespace #>
+{
+    public partial class <#= Model.Class #>
+    {
+<#
+    foreach (var field in Model.Fields)
+    {
+#>
+        public <#= field.Type #> <#= GetPropertyName(field) #> { get => <#= field.Name #>; set => <#= field.Name #> = value; }
+<#
+    }
+#>
+    }
+}

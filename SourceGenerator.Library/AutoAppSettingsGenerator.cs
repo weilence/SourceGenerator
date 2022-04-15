@@ -2,6 +2,7 @@
 using System.IO;
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json.Linq;
+using SourceGenerator.Library.Template;
 
 namespace SourceGenerator.Library
 {

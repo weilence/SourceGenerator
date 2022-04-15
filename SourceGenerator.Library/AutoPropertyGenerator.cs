@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
 using SourceGenerator.Common;
+using SourceGenerator.Library.Template;
 
 namespace SourceGenerator.Library
 {
@@ -61,31 +62,28 @@ namespace SourceGenerator.Library
                     continue;
                 }
 
-                var source = $@"// Auto-generated code
-
-namespace {namespaceDeclarationSyntax.Name.ToString()}
-{{
-    public partial class {classDeclarationSyntax.Identifier}
-    {{";
-                var propertyStr = "";
+                var model = new AutoPropertyModel()
+                {
+                    Namespace = namespaceDeclarationSyntax.Name.ToString(),
+                    Class = classDeclarationSyntax.Identifier.ValueText,
+                    Fields = new List<Field>()
+                };
                 foreach (var fieldDeclaration in fieldDeclarationList)
                 {
+                    var type = fieldDeclaration.Declaration.Type.ToString();
+
                     var variableDeclaratorSyntax = fieldDeclaration.Declaration.Variables.FirstOrDefault();
-
-                    var fieldName = variableDeclaratorSyntax.Identifier.ValueText;
-                    var propertyName = GetCamelCase(fieldName);
-
-                    propertyStr += $@"
-        public string {propertyName} {{ get => {fieldName}; set => {fieldName} = value; }}";
+                    var name = variableDeclaratorSyntax.Identifier.ValueText;
+                    model.Fields.Add(new Field()
+                    {
+                        Name = name,
+                        Type = type
+                    });
                 }
 
-                source += propertyStr;
-                source += @"
-    }
-}
-";
+                var autoProperty = new AutoProperty(model);
 
-                context.AddSource($"{classDeclarationSyntax.Identifier}.g.cs", source);
+                context.AddSource($"{model.Class}.g.cs", autoProperty.TransformText());
                 classList.Add(classDeclarationSyntax.Identifier.ValueText);
             }
         }

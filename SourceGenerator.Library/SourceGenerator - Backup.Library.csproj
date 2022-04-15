@@ -14,13 +14,17 @@
 		<PackageReference Include="System.CodeDom" Version="6.0.0" PrivateAssets="all" GeneratePathProperty="true" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" PrivateAssets="all" GeneratePathProperty="true" />
 	</ItemGroup>
-
+	
 	<ItemGroup>
 		<ProjectReference Include="..\SourceGenerator.Common\SourceGenerator.Common.csproj" PrivateAssets="all" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+		<None Update="AppSettings.tt">
+			<Generator>TextTemplatingFilePreprocessor</Generator>
+			<LastGenOutput>AppSettings.cs</LastGenOutput>
+		</None>
 	</ItemGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
@@ -42,30 +46,14 @@
 	<ItemGroup Condition="'$(Configuration)' == 'Release'">
 		<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
 		<None Include="$(OutputPath)\SourceGenerator.Common.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-
+		
 		<None Include="$(PkgSystem_CodeDom)\lib\netstandard2.0\*.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
 		<None Include="$(PkgNewtonsoft_Json)\lib\netstandard2.0\*.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-		<None Update="Template\AutoProperty.tt">
-		  <Generator>TextTemplatingFilePreprocessor</Generator>
-		  <LastGenOutput>AutoProperty.cs</LastGenOutput>
-		</None>
-
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Update="Template\AppSettings.cs">
-			<DesignTime>True</DesignTime>
-			<AutoGen>True</AutoGen>
-			<DependentUpon>AppSettings.tt</DependentUpon>
-		</Compile>
-		<None Update="Template\AppSettings.tt">
-			<Generator>TextTemplatingFilePreprocessor</Generator>
-			<LastGenOutput>AppSettings.cs</LastGenOutput>
-		</None>
-		<Compile Update="Template\AutoProperty.cs">
-		  <DesignTime>True</DesignTime>
-		  <AutoGen>True</AutoGen>
-		  <DependentUpon>AutoProperty.tt</DependentUpon>
-		</Compile>
+	  <Compile Update="AppSettings.cs">
+	    <DependentUpon>AppSettings.tt</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 </Project>

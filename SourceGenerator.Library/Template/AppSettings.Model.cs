@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 
-namespace SourceGenerator.Library
+namespace SourceGenerator.Library.Template
 {
     public partial class AppSettings
     {
