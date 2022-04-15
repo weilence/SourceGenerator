@@ -6,5 +6,5 @@ public partial class UserClass
 {
     [Property] private string _test = "test";
 
-    [Property] private string _test2;
+    [Property] private string _test2 = "test2";
 }

@@ -1,0 +1,25 @@
+<#@ template language="C#" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+// Auto-generated code
+
+namespace <#= Model.Namespace #>
+{
+    public class <#= Model.Class #>
+    {
+<#
+    foreach (var column in Model.Columns)
+    {
+        var type = GetType(column);
+        if (string.IsNullOrEmpty(type))
+        {
+            continue;
+        }
+#>
+        public const <#= type #> <#= column.Name #> = <#=
+                type == "string" ? "\"" + column.Value + "\"" : column.Value #>;
+<#
+    }
+#>
+    }
+}

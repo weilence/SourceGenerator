@@ -7,5 +7,6 @@ class Program
         var x = new UserClass();
         Console.WriteLine(x.Test);
         Console.WriteLine(x.Test2);
+        Console.WriteLine(AppSettings.Test3);
     }
 }

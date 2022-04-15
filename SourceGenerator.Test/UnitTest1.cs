@@ -9,7 +9,7 @@ namespace SourceGenerator.Test;
 public class UnitTest1
 {
     [Fact]
-    public void Test1()
+    public void TestAutoProperty()
     {
         // Create the 'input' compilation that the generator will act on
         Compilation inputCompilation = CreateCompilation(@"
@@ -36,6 +36,48 @@ namespace SourceGenerator.Demo
             out var diagnostics);
 
         GeneratorDriverRunResult runResult = driver.GetRunResult();
+
+        Assert.Equal(@"// Auto-generated code
+
+namespace SourceGenerator.Demo
+{
+    public partial class UserClass
+    {
+        public string Test { get => _test; set => _test = value; }
+        public string Test2 { get => _test2; set => _test2 = value; }
+    }
+}
+", runResult.GeneratedTrees[0].GetText().ToString());
+    }
+
+    [Fact]
+    public void TestAutoAppSettings()
+    {
+        // Create the 'input' compilation that the generator will act on
+        var inputCompilation = CreateCompilation(@"
+using SourceGenerator.Common;
+
+namespace SourceGenerator.Demo
+{
+    public partial class UserClass
+    {
+        [Property]
+        private string _test = ""test"";
+
+        [Property]
+        private string _test2;
+    }
+}
+");
+
+        var generator = new AutoAppSettingsGenerator();
+
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
+
+        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
+            out var diagnostics);
+
+        var runResult = driver.GetRunResult();
 
         Assert.Equal(@"// Auto-generated code
 

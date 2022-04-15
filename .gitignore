@@ -3,3 +3,5 @@ obj
 *.user
 .idea
 .vs
+pack
+publish.ps1
