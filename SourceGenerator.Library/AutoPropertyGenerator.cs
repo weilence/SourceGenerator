@@ -23,38 +23,26 @@ namespace SourceGenerator.Library
 
         public void Execute(GeneratorExecutionContext context)
         {
-            var syntaxReceiver = (AutoPropertyReceiver)context.SyntaxReceiver;
-            var attributeSyntaxList = syntaxReceiver.AttributeSyntaxList;
+            var receiver = (AutoPropertyReceiver)context.SyntaxReceiver;
+            var syntaxList = receiver.AttributeSyntaxList;
 
-            if (attributeSyntaxList.Count == 0)
+            if (syntaxList.Count == 0)
             {
                 return;
             }
 
-            var classList = new List<string>();
-            foreach (var attributeSyntax in attributeSyntaxList)
+            foreach (var classDeclarationSyntax in syntaxList)
             {
-                var semanticModel = context.Compilation.GetSemanticModel(attributeSyntax.SyntaxTree);
-                var typeSymbol = semanticModel.GetTypeInfo(attributeSyntax).Type;
-                if (typeSymbol?.ToString() != typeof(PropertyAttribute).FullName)
-                {
-                    continue;
-                }
+                var semanticModel = context.Compilation.GetSemanticModel(classDeclarationSyntax.SyntaxTree);
 
-                var classDeclarationSyntax = attributeSyntax.FirstAncestorOrSelf<ClassDeclarationSyntax>();
-                if (classDeclarationSyntax == null ||
-                    !classDeclarationSyntax.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)))
-                {
-                    continue;
-                }
+                // var typeSymbol = semanticModel.GetTypeInfo(attributeSyntax).Type;
+                // if (typeSymbol?.ToString() != typeof(PropertyAttribute).FullName)
+                // {
+                //     continue;
+                // }
 
                 var namespaceDeclarationSyntax =
                     classDeclarationSyntax.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>();
-
-                if (classList.Contains(classDeclarationSyntax.Identifier.ValueText))
-                {
-                    continue;
-                }
 
                 var fieldDeclarationList = classDeclarationSyntax.Members.OfType<FieldDeclarationSyntax>().ToList();
                 if (fieldDeclarationList.Count == 0)
@@ -64,33 +52,34 @@ namespace SourceGenerator.Library
 
                 var model = new AutoPropertyModel()
                 {
-                    Namespace = namespaceDeclarationSyntax.Name.ToString(),
-                    Class = classDeclarationSyntax.Identifier.ValueText,
+                    Namespace = SyntaxUtils.GetName(namespaceDeclarationSyntax),
+                    Class = SyntaxUtils.GetName(classDeclarationSyntax),
                     Fields = new List<Field>()
                 };
                 foreach (var fieldDeclaration in fieldDeclarationList)
                 {
                     var type = fieldDeclaration.Declaration.Type.ToString();
 
-                    var variableDeclaratorSyntax = fieldDeclaration.Declaration.Variables.FirstOrDefault();
-                    var name = variableDeclaratorSyntax.Identifier.ValueText;
-                    model.Fields.Add(new Field()
+                    foreach (var declarationVariable in fieldDeclaration.Declaration.Variables)
                     {
-                        Name = name,
-                        Type = type
-                    });
+                        var name = SyntaxUtils.GetName(declarationVariable);
+                        model.Fields.Add(new Field()
+                        {
+                            Name = name,
+                            Type = type
+                        });
+                    }
                 }
 
                 var autoProperty = new AutoProperty(model);
 
                 context.AddSource($"{model.Class}.g.cs", autoProperty.TransformText());
-                classList.Add(classDeclarationSyntax.Identifier.ValueText);
             }
         }
 
         private class AutoPropertyReceiver : ISyntaxReceiver
         {
-            public List<AttributeSyntax> AttributeSyntaxList { get; } = new List<AttributeSyntax>();
+            public HashSet<ClassDeclarationSyntax> AttributeSyntaxList { get; } = new HashSet<ClassDeclarationSyntax>();
 
             public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
             {
@@ -100,7 +89,12 @@ namespace SourceGenerator.Library
                         identifierName.Identifier.ValueText == nameof(PropertyAttribute))
                    )
                 {
-                    AttributeSyntaxList.Add(cds);
+                    var syntax = cds.FirstAncestorOrSelf<ClassDeclarationSyntax>();
+                    if (syntax == null) return;
+                    if (SyntaxUtils.HasModifier(syntax, SyntaxKind.PartialKeyword))
+                    {
+                        AttributeSyntaxList.Add(syntax);
+                    }
                 }
             }
         }

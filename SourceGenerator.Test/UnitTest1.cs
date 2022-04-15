@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -22,10 +23,10 @@ namespace SourceGenerator.Demo
     public partial class UserClass
     {
         [Property]
-        private string _test = ""test"";
+        private string _test;
 
         [Property]
-        private string _test2;
+        private string _test2, _test3;
     }
 }";
         var expected = @"// Auto-generated code
@@ -36,6 +37,7 @@ namespace SourceGenerator.Demo
     {
         public string Test { get => _test; set => _test = value; }
         public string Test2 { get => _test2; set => _test2 = value; }
+        public string Test3 { get => _test3; set => _test3 = value; }
     }
 }";
 
@@ -79,6 +81,12 @@ namespace compilation
             .RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
 
         var runResult = driver.GetRunResult();
+
+        var exception = runResult.Results.Select(m => m.Exception).FirstOrDefault();
+        if (exception != null)
+        {
+            throw new Exception(exception.Message, exception);
+        }
 
         return runResult.GeneratedTrees[0].GetText().ToString();
     }

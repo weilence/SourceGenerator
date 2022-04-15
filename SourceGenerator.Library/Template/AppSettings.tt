@@ -11,14 +11,13 @@ namespace <#= Model.Namespace #>
 <#
     foreach (var column in Model.Columns)
     {
-        var type = GetType(column);
-        if (string.IsNullOrEmpty(type))
+        if (string.IsNullOrEmpty(column.Type))
         {
             continue;
         }
 #>
-        public const <#= type #> <#= column.Name #> = <#=
-                type == "string" ? "\"" + column.Value + "\"" : column.Value #>;
+        public const <#= column.Type #> <#= column.Name #> = <#=
+                column.Type == "string" ? "\"" + column.Value + "\"" : column.Value #>;
 <#
     }
 #>

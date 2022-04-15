@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
 
 namespace SourceGenerator.Library.Template
 {
@@ -10,21 +9,6 @@ namespace SourceGenerator.Library.Template
         public AppSettings(AppSettingsModel model)
         {
             this.Model = model;
-        }
-
-        private string GetType(Column column)
-        {
-            switch (column.Type)
-            {
-                case JTokenType.String:
-                    return "string";
-                case JTokenType.Integer:
-                    return "int";
-                case JTokenType.Boolean:
-                    return "bool";
-                default:
-                    return null;
-            }
         }
     }
 
@@ -41,7 +25,7 @@ namespace SourceGenerator.Library.Template
     {
         public string Name { get; set; }
 
-        public JTokenType? Type { get; set; }
+        public string Type { get; set; }
 
         public string Value { get; set; }
     }

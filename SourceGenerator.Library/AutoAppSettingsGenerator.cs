@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
 using Microsoft.CodeAnalysis;
-using Newtonsoft.Json.Linq;
 using SourceGenerator.Library.Template;
 
 namespace SourceGenerator.Library
@@ -29,15 +29,17 @@ namespace SourceGenerator.Library
             }
 
             var appSettingsFile = File.ReadAllText(path);
-            var rootElement = JObject.Parse(appSettingsFile);
+
+            var rootElement = JsonDocument.Parse(appSettingsFile).RootElement;
             var columns = new List<Column>();
-            foreach (var jsonProperty in rootElement)
+            foreach (var jsonProperty in rootElement.EnumerateObject())
             {
+                var value = jsonProperty.Value.GetString();
                 columns.Add(new Column()
                 {
-                    Name = jsonProperty.Key,
-                    Value = jsonProperty.Value?.ToString(),
-                    Type = jsonProperty.Value?.Type,
+                    Name = jsonProperty.Name,
+                    Value = value,
+                    Type = JsonUtils.GetType(jsonProperty.Value.ValueKind, value)
                 });
             }
 
