@@ -2,7 +2,7 @@
 
 namespace SourceGenerator.Common
 {
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Class)]
+    [AttributeUsage(AttributeTargets.Field)]
     public class ArgsIgnoreAttribute : Attribute
     {
         public const string Name = "ArgsIgnore";

@@ -63,6 +63,10 @@
 			<Generator>TextTemplatingFilePreprocessor</Generator>
 			<LastGenOutput>AutoArgs.cs</LastGenOutput>
 		</None>
+		<None Update="Template\AutoService.tt">
+			<Generator>TextTemplatingFilePreprocessor</Generator>
+			<LastGenOutput>AutoService.cs</LastGenOutput>
+		</None>
 		<Compile Update="Template\AutoArgs.cs">
 		  <AutoGen>True</AutoGen>
 		  <DesignTime>True</DesignTime>
@@ -80,6 +84,11 @@
 		  <AutoGen>True</AutoGen>
 		  <DesignTime>True</DesignTime>
 		  <DependentUpon>AutoProperty.tt</DependentUpon>
+		</Compile>
+		<Compile Update="Template\AutoService.cs">
+		  <AutoGen>True</AutoGen>
+		  <DesignTime>True</DesignTime>
+		  <DependentUpon>AutoService.tt</DependentUpon>
 		</Compile>
 	</ItemGroup>
 </Project>

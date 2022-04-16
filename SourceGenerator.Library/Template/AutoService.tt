@@ -1,0 +1,26 @@
+<#@ template language="C#" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Linq" #>
+// Auto-generated code
+<#=
+                    string.Join("\r\n", Model.ClassList.Select(m => "using " + m.Namespace + ";").Distinct()) #>
+
+namespace Microsoft.Extensions.DependencyInjection
+{
+    public static class AutoServiceExtension
+    {
+        public static IServiceCollection AddAutoServices(this IServiceCollection services)
+        {
+<#
+    foreach (var @class in Model.ClassList)
+    {
+#>
+            services.AddSingleton<<#= @class.Class #>>();
+<#
+    }
+#>
+            return services;
+        }
+    }
+}

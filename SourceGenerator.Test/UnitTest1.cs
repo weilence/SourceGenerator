@@ -141,6 +141,36 @@ namespace SourceGenerator.Demo
         Assert.Equal(expected2, actual[1]);
     }
 
+    [Fact]
+    public void TestAutoService()
+    {
+        var expected = @"// Auto-generated code
+using SourceGenerator.Demo;
+
+namespace Microsoft.Extensions.DependencyInjection
+{
+    public static class AutoServiceExtension
+    {
+        public static IServiceCollection AddAutoServices(this IServiceCollection services)
+        {
+            services.AddSingleton<AutoServiceClass>();
+            return services;
+        }
+    }
+}";
+        var source = @"
+namespace SourceGenerator.Demo;
+
+[Service]
+public class AutoServiceClass
+{
+    
+}";
+        var actual = Run<AutoServiceGenerator>(source);
+
+        Assert.Equal(expected, actual[0]);
+    }
+
     private static List<string> Run<T>(params string[] sources) where T : ISourceGenerator, new()
     {
         var inputCompilation = CreateCompilation(sources);
