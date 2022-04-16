@@ -3,8 +3,11 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Linq" #>
 // Auto-generated code
-<#=
-                    string.Join("\r\n", Model.ClassList.Select(m => "using " + m.Namespace + ";").Distinct()) #>
+<#
+    var list = Model.ClassList.Select(m => "using " + m.Namespace + ";").Distinct();
+    Write(string.Join("\r\n", list));
+#>
+
 
 namespace Microsoft.Extensions.DependencyInjection
 {

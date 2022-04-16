@@ -31,13 +31,16 @@ namespace SourceGenerator.Library.Template
             this.Write("// Auto-generated code\r\n");
             
             #line 6 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoService.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(string.Join("\r\n", Model.ClassList.Select(m => "using " + m.Namespace + ";").Distinct())));
+
+    var list = Model.ClassList.Select(m => "using " + m.Namespace + ";").Distinct();
+    Write(string.Join("\r\n", list));
+
             
             #line default
             #line hidden
             this.Write("\r\n\r\nnamespace Microsoft.Extensions.DependencyInjection\r\n{\r\n    public static class AutoServiceExtension\r\n    {\r\n        public static IServiceCollection AddAutoServices(this IServiceCollection services)\r\n        {\r\n");
             
-            #line 15 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoService.tt"
+            #line 18 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoService.tt"
 
     foreach (var @class in Model.ClassList)
     {
@@ -47,14 +50,14 @@ namespace SourceGenerator.Library.Template
             #line hidden
             this.Write("            services.AddSingleton<");
             
-            #line 19 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoService.tt"
+            #line 22 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoService.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(@class.Class));
             
             #line default
             #line hidden
             this.Write(">();\r\n");
             
-            #line 20 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoService.tt"
+            #line 23 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoService.tt"
 
     }
 
