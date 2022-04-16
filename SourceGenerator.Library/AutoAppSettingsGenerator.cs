@@ -34,8 +34,7 @@ namespace SourceGenerator.Library
             var columns = new List<Column>();
             foreach (var jsonProperty in rootElement.EnumerateObject())
             {
-                var value = jsonProperty.Value.ToString();
-                var type = JsonUtils.GetType(jsonProperty.Value.ValueKind, value);
+                var (type, value) = JsonUtils.GetTypeAndValue(jsonProperty);
                 if (type == null)
                 {
                     continue;

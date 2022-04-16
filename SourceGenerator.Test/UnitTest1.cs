@@ -60,7 +60,8 @@ namespace compilation
     {
         public const string Test = ""1"";
         public const int Test2 = 2;
-        public const bool Test3 = True;
+        public const bool Test3 = true;
+        public const decimal Test7 = 7.0;
     }
 }";
 

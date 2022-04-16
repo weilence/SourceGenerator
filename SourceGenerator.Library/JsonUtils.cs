@@ -5,24 +5,26 @@ namespace SourceGenerator.Library
 {
     public class JsonUtils
     {
-        public static string GetType(JsonValueKind kind, string value)
+        public static (string type, string value) GetTypeAndValue(JsonProperty property)
         {
-            switch (kind)
+            switch (property.Value.ValueKind)
             {
                 case JsonValueKind.Number:
-                    return value.Contains(".") ? "double" : "int";
+                    var value = property.Value.ToString();
+                    var type = value.Contains(".") ? "decimal" : "int";
+                    return (type, value);
                 case JsonValueKind.True:
                 case JsonValueKind.False:
-                    return "bool";
+                    return ("bool", property.Value.GetBoolean().ToString().ToLower());
                 case JsonValueKind.String:
-                    return "string";
+                    return ("string", property.Value.GetString());
                 case JsonValueKind.Undefined:
                 case JsonValueKind.Null:
                 case JsonValueKind.Object:
                 case JsonValueKind.Array:
-                    return null;
+                    return (null, null);
                 default:
-                    throw new ArgumentException($"Unknown value kind: {kind}");
+                    throw new ArgumentException($"Unknown value kind: {property.Value.ValueKind}");
             }
         }
     }
