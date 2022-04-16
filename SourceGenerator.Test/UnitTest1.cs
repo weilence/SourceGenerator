@@ -58,7 +58,9 @@ namespace compilation
 {
     public class AppSettings
     {
-        public const string Test3 = ""test3"";
+        public const string Test = ""1"";
+        public const int Test2 = 2;
+        public const bool Test3 = True;
     }
 }";
 
@@ -96,6 +98,9 @@ namespace SourceGenerator.Demo
         private const string test4;
 
         public string test5;
+
+        [ArgsIgnore]
+        public string test6;
     }
 }";
         var expected = @"// Auto-generated code
