@@ -243,7 +243,7 @@ public class AutoServiceClass
             this._dictionary = dictionary;
         }
 
-        public override bool TryGetValue(string key, out string? value)
+        public override bool TryGetValue(string key, out string value)
         {
             return _dictionary.TryGetValue(key, out value);
         }

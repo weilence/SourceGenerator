@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.CodeAnalysis.CSharp;
 using SourceGenerator.Common;
 using SourceGenerator.Library.Template;
 
@@ -28,6 +29,13 @@ namespace SourceGenerator.Library
 
             foreach (var classDeclarationSyntax in syntaxList)
             {
+                if (!SyntaxUtils.HasModifier(classDeclarationSyntax, SyntaxKind.PartialKeyword))
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.SGL001, classDeclarationSyntax.GetLocation(),
+                        SyntaxUtils.GetName(classDeclarationSyntax)));
+                    continue;
+                }
+
                 var namespaceDeclarationSyntax =
                     classDeclarationSyntax.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>();
 

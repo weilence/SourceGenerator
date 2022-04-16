@@ -23,10 +23,7 @@ namespace SourceGenerator.Library
             {
                 var syntax = cds.FirstAncestorOrSelf<ClassDeclarationSyntax>();
                 if (syntax == null) return;
-                if (SyntaxUtils.HasModifier(syntax, SyntaxKind.PartialKeyword))
-                {
-                    AttributeSyntaxList.Add(syntax);
-                }
+                AttributeSyntaxList.Add(syntax);
             }
         }
     }
