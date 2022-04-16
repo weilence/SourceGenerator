@@ -37,14 +37,22 @@ namespace SourceGenerator.Library
                     continue;
                 }
 
+                var compilationUnitSyntax = classDeclarationSyntax.SyntaxTree.GetRoot() as CompilationUnitSyntax;
+                var usings = compilationUnitSyntax.Usings.Select(m => m.ToString()).ToList();
                 var model = new ClassModel()
                 {
+                    Usings = usings,
                     Namespace = SyntaxUtils.GetName(namespaceDeclarationSyntax),
                     Class = SyntaxUtils.GetName(classDeclarationSyntax),
                     Fields = new List<Field>()
                 };
                 foreach (var fieldDeclaration in fieldDeclarationList)
                 {
+                    if (!SyntaxUtils.HasAttribute(fieldDeclaration, name => receiver.Names.Contains(name)))
+                    {
+                        continue;
+                    }
+
                     var type = fieldDeclaration.Declaration.Type.ToString();
 
                     foreach (var declarationVariable in fieldDeclaration.Declaration.Variables)

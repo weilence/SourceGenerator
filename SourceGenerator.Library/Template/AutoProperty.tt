@@ -3,6 +3,7 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 // Auto-generated code
+<#= string.Join("\r\n", Model.Usings) #>
 
 namespace <#= Model.Namespace #>
 {

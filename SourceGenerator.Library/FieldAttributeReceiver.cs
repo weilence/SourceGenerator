@@ -8,11 +8,11 @@ namespace SourceGenerator.Library
 {
     public class FieldAttributeReceiver : ISyntaxReceiver
     {
-        private readonly List<string> _names;
+        public readonly List<string> Names;
 
         public FieldAttributeReceiver(List<string> names)
         {
-            this._names = names;
+            this.Names = names;
         }
 
         public HashSet<ClassDeclarationSyntax> AttributeSyntaxList { get; } = new HashSet<ClassDeclarationSyntax>();
@@ -20,7 +20,7 @@ namespace SourceGenerator.Library
         public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
         {
             if (syntaxNode is AttributeSyntax cds && cds.Name is IdentifierNameSyntax identifierName &&
-                _names.Contains(identifierName.Identifier.ValueText))
+                Names.Contains(identifierName.Identifier.ValueText))
             {
                 var syntax = cds.FirstAncestorOrSelf<ClassDeclarationSyntax>();
                 if (syntax == null) return;

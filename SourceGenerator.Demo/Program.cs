@@ -8,6 +8,6 @@ class Program
         Console.WriteLine(autoPropertyClass.Test);
         Console.WriteLine(autoPropertyClass.Test2);
         Console.WriteLine(AppSettings.Test3);
-        var autoArgsClass = new AutoArgsClass("test", "test2");
+        var autoArgsClass = new AutoArgsClass("test", "test2", autoPropertyClass);
     }
 }

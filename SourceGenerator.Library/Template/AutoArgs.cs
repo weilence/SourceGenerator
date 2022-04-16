@@ -28,61 +28,69 @@ namespace SourceGenerator.Library.Template
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("// Auto-generated code\r\n\r\nnamespace ");
+            this.Write("// Auto-generated code\r\n");
             
-            #line 8 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoArgs.tt"
+            #line 7 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoArgs.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(string.Join("\r\n", Model.Usings)));
+            
+            #line default
+            #line hidden
+            this.Write("\r\n\r\nnamespace ");
+            
+            #line 9 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoArgs.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.Namespace));
             
             #line default
             #line hidden
             this.Write("\r\n{\r\n    public partial class ");
             
-            #line 10 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoArgs.tt"
+            #line 11 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoArgs.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.Class));
             
             #line default
             #line hidden
             this.Write("\r\n    {\r\n        public ");
             
-            #line 12 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoArgs.tt"
+            #line 13 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoArgs.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.Class));
             
             #line default
             #line hidden
             this.Write("(");
             
-            #line 12 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoArgs.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(string.Join(", ", Model.Fields.Select(m => m.Type + " " + StringUtils.ToCamelCase(m.Name)))));
+            #line 13 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoArgs.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(string.Join(", ", Model.Fields.Select((m, index) => m.Type + " a" + index))));
             
             #line default
             #line hidden
             this.Write(")\r\n        {\r\n");
             
-            #line 15 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoArgs.tt"
+            #line 16 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoArgs.tt"
 
-    foreach (var field in Model.Fields)
+    for (int i = 0; i < Model.Fields.Count; i++)
     {
+        var field = Model.Fields[i];
 
             
             #line default
             #line hidden
             this.Write("            this.");
             
-            #line 19 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoArgs.tt"
+            #line 21 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoArgs.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(field.Name));
             
             #line default
             #line hidden
-            this.Write(" = ");
+            this.Write(" = a");
             
-            #line 19 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoArgs.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(StringUtils.ToCamelCase(field.Name)));
+            #line 21 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoArgs.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(i));
             
             #line default
             #line hidden
             this.Write(";\r\n");
             
-            #line 20 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoArgs.tt"
+            #line 22 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoArgs.tt"
 
     }
 

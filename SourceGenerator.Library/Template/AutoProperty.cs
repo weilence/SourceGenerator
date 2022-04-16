@@ -27,23 +27,30 @@ namespace SourceGenerator.Library.Template
         /// </summary>
         public virtual string TransformText()
         {
-            this.Write("// Auto-generated code\r\n\r\nnamespace ");
+            this.Write("// Auto-generated code\r\n");
             
-            #line 7 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoProperty.tt"
+            #line 6 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoProperty.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(string.Join("\r\n", Model.Usings)));
+            
+            #line default
+            #line hidden
+            this.Write("\r\n\r\nnamespace ");
+            
+            #line 8 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoProperty.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.Namespace));
             
             #line default
             #line hidden
             this.Write("\r\n{\r\n    public partial class ");
             
-            #line 9 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoProperty.tt"
+            #line 10 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoProperty.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.Class));
             
             #line default
             #line hidden
             this.Write("\r\n    {\r\n");
             
-            #line 11 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoProperty.tt"
+            #line 12 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoProperty.tt"
 
     foreach (var field in Model.Fields)
     {
@@ -53,35 +60,35 @@ namespace SourceGenerator.Library.Template
             #line hidden
             this.Write("        public ");
             
-            #line 15 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoProperty.tt"
+            #line 16 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoProperty.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(field.Type));
             
             #line default
             #line hidden
             this.Write(" ");
             
-            #line 15 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoProperty.tt"
+            #line 16 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoProperty.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(StringUtils.ToPascalCase(field.Name)));
             
             #line default
             #line hidden
             this.Write(" { get => ");
             
-            #line 15 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoProperty.tt"
+            #line 16 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoProperty.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(field.Name));
             
             #line default
             #line hidden
             this.Write("; set => ");
             
-            #line 15 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoProperty.tt"
+            #line 16 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoProperty.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(field.Name));
             
             #line default
             #line hidden
             this.Write(" = value; }\r\n");
             
-            #line 16 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoProperty.tt"
+            #line 17 "C:\Users\weile\source\repos\SourceGenerator\SourceGenerator.Library\Template\AutoProperty.tt"
 
     }
 

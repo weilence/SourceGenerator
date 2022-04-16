@@ -27,5 +27,11 @@ namespace SourceGenerator.Library
                     throw new NotImplementedException();
             }
         }
+
+        public static bool HasAttribute(FieldDeclarationSyntax fieldDeclaration, Func<string, bool> func)
+        {
+            return fieldDeclaration.AttributeLists.SelectMany(m => m.Attributes)
+                .Any(m => func(m.Name.ToString()));
+        }
     }
 }

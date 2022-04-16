@@ -27,9 +27,12 @@ namespace SourceGenerator.Demo
 
         [Property]
         private string _test2, _test3;
+
+        private const string test4;
     }
 }";
         var expected = @"// Auto-generated code
+using SourceGenerator.Common;
 
 namespace SourceGenerator.Demo
 {
@@ -63,11 +66,11 @@ namespace compilation
 
         Assert.Equal(expected, actual);
     }
-    
+
     [Fact]
     public void TestAutoArgs()
     {
-        var source = @"
+        var source1 = @"
 using SourceGenerator.Common;
 
 namespace SourceGenerator.Demo
@@ -79,31 +82,34 @@ namespace SourceGenerator.Demo
 
         [Args]
         private string _test2, _test3;
+
+        private const string test4;
     }
 }";
         var expected = @"// Auto-generated code
+using SourceGenerator.Common;
 
 namespace SourceGenerator.Demo
 {
     public partial class UserClass
     {
-        public UserClass(string test, string test2, string test3)
+        public UserClass(string a0, string a1, string a2)
         {
-            this._test = test;
-            this._test2 = test2;
-            this._test3 = test3;
+            this._test = a0;
+            this._test2 = a1;
+            this._test3 = a2;
         }
     }
 }";
 
-        var actual = Run<AutoArgsGenerator>(source);
+        var actual = Run<AutoArgsGenerator>(source1);
 
         Assert.Equal(expected, actual);
     }
 
-    private static string Run<T>(string source) where T : ISourceGenerator, new()
+    private static string Run<T>(params string[] sources) where T : ISourceGenerator, new()
     {
-        var inputCompilation = CreateCompilation(source);
+        var inputCompilation = CreateCompilation(sources);
 
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new T());
 
@@ -128,12 +134,12 @@ namespace SourceGenerator.Demo
         return runResult.GeneratedTrees[0].GetText().ToString();
     }
 
-    private static Compilation CreateCompilation(string source)
+    private static Compilation CreateCompilation(IEnumerable<string> sources)
     {
         var options = new CSharpCompilationOptions(OutputKind.ConsoleApplication);
         var reference = MetadataReference.CreateFromFile(typeof(PropertyAttribute).Assembly.Location);
-        var syntaxTree = CSharpSyntaxTree.ParseText(source);
-        var compilation = CSharpCompilation.Create("compilation", new[] { syntaxTree }, new[] { reference },
+        var syntaxTrees = sources.Select(m => CSharpSyntaxTree.ParseText(m));
+        var compilation = CSharpCompilation.Create("compilation", syntaxTrees, new[] { reference },
             options
         );
 

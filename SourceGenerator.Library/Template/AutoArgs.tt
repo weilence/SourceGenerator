@@ -4,19 +4,21 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="System.Linq" #>
 // Auto-generated code
+<#= string.Join("\r\n", Model.Usings) #>
 
 namespace <#= Model.Namespace #>
 {
     public partial class <#= Model.Class #>
     {
         public <#= Model.Class #>(<#=
-                string.Join(", ", Model.Fields.Select(m => m.Type + " " + StringUtils.ToCamelCase(m.Name))) #>)
+                string.Join(", ", Model.Fields.Select((m, index) => m.Type + " a" + index)) #>)
         {
 <#
-    foreach (var field in Model.Fields)
+    for (int i = 0; i < Model.Fields.Count; i++)
     {
+        var field = Model.Fields[i];
 #>
-            this.<#= field.Name #> = <#= StringUtils.ToCamelCase(field.Name) #>;
+            this.<#= field.Name #> = a<#= i #>;
 <#
     }
 #>

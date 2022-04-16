@@ -9,6 +9,7 @@ namespace SourceGenerator.Library.Template
         public string Class { get; set; }
 
         public List<Field> Fields { get; set; }
+        public List<string> Usings { get; set; }
     }
 
     public class Field
