@@ -46,7 +46,7 @@ namespace SourceGenerator.Demo
 
         var actual = Run<AutoPropertyGenerator>(source);
 
-        Assert.Equal(expected, actual);
+        Assert.Equal(expected, actual[0]);
     }
 
     [Fact]
@@ -64,7 +64,7 @@ namespace compilation
 
         var actual = Run<AutoAppSettingsGenerator>("");
 
-        Assert.Equal(expected, actual);
+        Assert.Equal(expected, actual[0]);
     }
 
     [Fact]
@@ -85,6 +85,18 @@ namespace SourceGenerator.Demo
 
         private const string test4;
     }
+
+    [Args]
+    public partial class UserClass2
+    {
+        private string _test;
+
+        private string _test2, _test3;
+
+        private const string test4;
+
+        public string test5;
+    }
 }";
         var expected = @"// Auto-generated code
 using SourceGenerator.Common;
@@ -101,13 +113,29 @@ namespace SourceGenerator.Demo
         }
     }
 }";
+        var expected2 = @"// Auto-generated code
+using SourceGenerator.Common;
+
+namespace SourceGenerator.Demo
+{
+    public partial class UserClass2
+    {
+        public UserClass2(string a0, string a1, string a2)
+        {
+            this._test = a0;
+            this._test2 = a1;
+            this._test3 = a2;
+        }
+    }
+}";
 
         var actual = Run<AutoArgsGenerator>(source1);
 
-        Assert.Equal(expected, actual);
+        Assert.Equal(expected, actual[0]);
+        Assert.Equal(expected2, actual[1]);
     }
 
-    private static string Run<T>(params string[] sources) where T : ISourceGenerator, new()
+    private static List<string> Run<T>(params string[] sources) where T : ISourceGenerator, new()
     {
         var inputCompilation = CreateCompilation(sources);
 
@@ -131,7 +159,7 @@ namespace SourceGenerator.Demo
             throw new Exception(exception.Message, exception);
         }
 
-        return runResult.GeneratedTrees[0].GetText().ToString();
+        return runResult.GeneratedTrees.Select(m => m.GetText().ToString()).ToList();
     }
 
     private static Compilation CreateCompilation(IEnumerable<string> sources)

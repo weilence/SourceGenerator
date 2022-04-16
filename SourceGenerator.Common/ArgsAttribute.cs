@@ -2,7 +2,7 @@
 
 namespace SourceGenerator.Common
 {
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Class)]
     public class ArgsAttribute : Attribute
     {
         public const string Name = "Args";
