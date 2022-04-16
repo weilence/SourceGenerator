@@ -16,6 +16,11 @@ namespace SourceGenerator.Library
                     return "bool";
                 case JsonValueKind.String:
                     return "string";
+                case JsonValueKind.Undefined:
+                case JsonValueKind.Null:
+                case JsonValueKind.Object:
+                case JsonValueKind.Array:
+                    return null;
                 default:
                     throw new ArgumentException($"Unknown value kind: {kind}");
             }
