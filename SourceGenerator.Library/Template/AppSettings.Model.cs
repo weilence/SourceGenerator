@@ -2,16 +2,6 @@
 
 namespace SourceGenerator.Library.Template
 {
-    public partial class AppSettings
-    {
-        private readonly AppSettingsModel Model;
-
-        public AppSettings(AppSettingsModel model)
-        {
-            this.Model = model;
-        }
-    }
-
     public class AppSettingsModel
     {
         public string Namespace { get; set; }
