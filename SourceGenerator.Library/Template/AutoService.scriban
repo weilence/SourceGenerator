@@ -1,7 +1,7 @@
 // Auto-generated code
-{{ for class in Model.ClassList ~}}
-    {{~ "using " + class.Namespace + ";" ~}}
-{{~ end }}
+{{~ for namespace in Model.ClassList | array.map 'Namespace' | array.uniq ~}}
+    {{~ "using " + namespace + ";" }}
+{{~ end ~}}
 
 namespace Microsoft.Extensions.DependencyInjection
 {

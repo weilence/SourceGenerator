@@ -1,7 +1,7 @@
 // Auto-generated code
-{{ for using in Model.Usings ~}}
-    {{~ using ~}}
-{{~ end }}
+{{~ for using in Model.Usings ~}}
+    {{~ using }}
+{{~ end ~}}
 
 namespace {{ Model.Namespace }}
 {

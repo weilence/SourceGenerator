@@ -2,7 +2,6 @@
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
-		<Version>0.0.5.4</Version>
 		<PackageProjectUrl>https://github.com/Weilence/SourceGenerator</PackageProjectUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<RepositoryUrl>https://github.com/Weilence/SourceGenerator</RepositoryUrl>
@@ -12,6 +11,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Nerdbank.GitVersioning" Version="3.4.255">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.1.0" PrivateAssets="all" />
 		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.3">
 			<PrivateAssets>all</PrivateAssets>
@@ -23,7 +27,6 @@
 		<PackageReference Include="Scriban" Version="5.4.4" PrivateAssets="all" GeneratePathProperty="true" />
 		<PackageReference Include="System.Text.Json" Version="6.0.3" PrivateAssets="all" GeneratePathProperty="true" />
 
-		<EmbeddedResource Include="Template\*.tt" />
 		<EmbeddedResource Include="Template\*.scriban" />
 	</ItemGroup>
 
@@ -34,6 +37,7 @@
 	<Target Condition="'$(Configuration)' == 'Debug'" Name="GetDependencyTargetPaths">
 		<ItemGroup>
 			<TargetPathWithTargetPlatformMoniker Include="..\SourceGenerator.Common\bin\$(Configuration)\netstandard2.0\SourceGenerator.Common.dll" IncludeRuntimeDependency="false" />
+
 			<TargetPathWithTargetPlatformMoniker Include="$(PkgSystem_Text_Json)\lib\netstandard2.0\*.dll" IncludeRuntimeDependency="false" />
 			<TargetPathWithTargetPlatformMoniker Include="$(PkgScriban)\lib\netstandard2.0\*.dll" IncludeRuntimeDependency="false" />
 		</ItemGroup>

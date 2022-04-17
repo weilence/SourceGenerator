@@ -146,6 +146,7 @@ namespace SourceGenerator.Demo
     {
         var expected = @"// Auto-generated code
 using SourceGenerator.Demo;
+using SourceGenerator.Demo2;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -154,18 +155,37 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddAutoServices(this IServiceCollection services)
         {
             services.AddSingleton<AutoServiceClass>();
+            services.AddSingleton<AutoServiceClass2>();
+            services.AddSingleton<AutoServiceClass3>();
             return services;
         }
     }
 }";
-        var source = @"
+        var source = new[]
+        {
+            @"
 namespace SourceGenerator.Demo;
 
 [Service]
 public class AutoServiceClass
 {
     
-}";
+}",
+            @"
+namespace SourceGenerator.Demo2;
+
+[Service]
+public class AutoServiceClass2
+{
+    
+}
+
+[Service]
+public class AutoServiceClass3
+{
+    
+}"
+        };
         var actual = Run<AutoServiceGenerator>(source);
 
         Assert.Equal(expected, actual[0]);
