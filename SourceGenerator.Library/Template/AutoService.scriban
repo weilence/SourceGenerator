@@ -1,0 +1,18 @@
+// Auto-generated code
+{{ for class in Model.ClassList ~}}
+    {{~ "using " + class.Namespace + ";" ~}}
+{{~ end }}
+
+namespace Microsoft.Extensions.DependencyInjection
+{
+    public static class AutoServiceExtension
+    {
+        public static IServiceCollection AddAutoServices(this IServiceCollection services)
+        {
+{{~ for class in Model.ClassList ~}}
+            services.AddSingleton<{{ class.Class }}>();
+{{~ end ~}}
+            return services;
+        }
+    }
+}

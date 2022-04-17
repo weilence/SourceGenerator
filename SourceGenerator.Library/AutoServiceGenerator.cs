@@ -45,12 +45,12 @@ namespace SourceGenerator.Library
                 return;
             }
 
-            var autoService = new AutoService(new AutoServiceModel()
+            var model = new AutoServiceModel()
             {
                 ClassList = classList
-            });
+            };
 
-            context.AddSource($"AutoServiceExtension.Class.g.cs", autoService.TransformText());
+            context.AddSource($"AutoServiceExtension.Class.g.cs", RenderUtils.Render("AutoService", model));
         }
     }
 }

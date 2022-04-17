@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using Microsoft.CodeAnalysis;
@@ -48,12 +49,12 @@ namespace SourceGenerator.Library
                 });
             }
 
-            var appSettings = new AppSettings(new AppSettingsModel()
+            var appSettings = new AppSettingsModel()
             {
                 Namespace = context.Compilation.AssemblyName,
                 Columns = columns,
-            });
-            context.AddSource("AppSettings.g.cs", appSettings.TransformText());
+            };
+            context.AddSource("AppSettings.g.cs", RenderUtils.Render("AppSettings", appSettings));
         }
     }
 }

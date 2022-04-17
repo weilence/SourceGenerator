@@ -98,9 +98,8 @@ namespace SourceGenerator.Library
                     Class = SyntaxUtils.GetName(classDeclarationSyntax),
                     Fields = fields
                 };
-                var autoProperty = new AutoArgs(model);
 
-                context.AddSource($"{model.Class}.g.cs", autoProperty.TransformText());
+                context.AddSource($"{model.Class}.g.cs", RenderUtils.Render("AutoArgs", model));
             }
         }
     }

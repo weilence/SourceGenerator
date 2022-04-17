@@ -1,0 +1,21 @@
+﻿// Auto-generated code
+{{ for using in Model.Usings ~}}
+    {{~ using ~}}
+{{~ end }}
+
+namespace {{ Model.Namespace }}
+{
+    public partial class {{ Model.Class }}
+    {
+        public {{ Model.Class }}(
+{{- for field in Model.Fields ~}}
+    {{~ field.Type }} a{{ for.index ~}} {{~ if !for.last }}, {{ end ~}} 
+{{~ end -}}      
+)
+        {
+{{~ for field in Model.Fields ~}}
+            this.{{ field.Name }} = a{{ for.index }};
+{{~ end ~}}
+        }
+    }
+}

@@ -31,7 +31,8 @@ namespace SourceGenerator.Library
             {
                 if (!SyntaxUtils.HasModifier(classDeclarationSyntax, SyntaxKind.PartialKeyword))
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.SGL001, classDeclarationSyntax.GetLocation(),
+                    context.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.SGL001,
+                        classDeclarationSyntax.GetLocation(),
                         SyntaxUtils.GetName(classDeclarationSyntax)));
                     continue;
                 }
@@ -74,9 +75,7 @@ namespace SourceGenerator.Library
                     }
                 }
 
-                var autoProperty = new AutoProperty(model);
-
-                context.AddSource($"{model.Class}.g.cs", autoProperty.TransformText());
+                context.AddSource($"{model.Class}.g.cs", RenderUtils.Render("AutoProperty", model));
             }
         }
     }

@@ -1,0 +1,13 @@
+// Auto-generated code
+
+namespace {{ Model.Namespace }}
+{
+    public class {{ Model.Class }}
+    {
+{{~ for column in Model.Columns ~}}
+    {{~ if column.Type ~}}
+        public const {{ column.Type }} {{ column.Name }} = {{ column.Type == "string" ? "\"" + column.Value + "\"" : column.Value }};
+    {{~ end ~}}
+{{~ end ~}}
+    }
+}
