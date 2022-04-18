@@ -22,7 +22,7 @@ namespace SourceGenerator.Library
             if (s.Contains("_"))
             {
                 return s.Split(new[] { "_" }, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(m => m.ToLower())
+                    .Select(m => m.ToLower().Replace(".", "_"))
                     .ToList();
             }
 
@@ -33,16 +33,23 @@ namespace SourceGenerator.Library
                 var c = s[i];
                 if (char.IsUpper(c) && !char.IsUpper(s[i - 1]))
                 {
-                    result.Add(word.ToLower());
+                    result.Add(word);
                     word = "";
                 }
 
-                word += c;
+                if (c == '.')
+                {
+                    word += '_';
+                }
+                else
+                {
+                    word += char.ToLower(c);
+                }
             }
 
             if (word != "")
             {
-                result.Add(word.ToLower());
+                result.Add(word);
             }
 
             return result;

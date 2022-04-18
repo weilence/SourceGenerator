@@ -30,6 +30,7 @@ namespace SourceGenerator.Library
 
         public static PropertyInfo ParseProperty(JsonProperty property)
         {
+            var propertyName = StringUtils.ToPascalCase(property.Name);
             switch (property.Value.ValueKind)
             {
                 case JsonValueKind.Number:
@@ -37,38 +38,38 @@ namespace SourceGenerator.Library
                     return new PropertyInfo()
                     {
                         Type = value.Contains(".") ? "decimal" : "int",
-                        Name = property.Name,
+                        Name = propertyName,
                         Value = value,
                     };
                 case JsonValueKind.True:
                     return new PropertyInfo()
                     {
                         Type = "bool",
-                        Name = property.Name,
+                        Name = propertyName,
                         Value = "true",
                     };
                 case JsonValueKind.False:
                     return new PropertyInfo()
                     {
                         Type = "bool",
-                        Name = property.Name,
+                        Name = propertyName,
                         Value = "false",
                     };
                 case JsonValueKind.String:
                     return new PropertyInfo()
                     {
                         Type = "string",
-                        Name = property.Name,
+                        Name = propertyName,
                         Value = property.Value.GetString(),
                     };
                 case JsonValueKind.Object:
                     var classInfo = ParseJson(property.Value);
-                    classInfo.Name = property.Name;
+                    classInfo.Name = propertyName;
                     return new PropertyInfo()
                     {
-                        Type = property.Name,
-                        Name = property.Name,
-                        Value = property.Name,
+                        Type = propertyName,
+                        Name = propertyName,
+                        Value = propertyName,
                         Class = classInfo,
                     };
                 case JsonValueKind.Undefined:

@@ -54,7 +54,7 @@ namespace SourceGenerator.Demo
     {
         var expected = @"// Auto-generated code
 
-namespace compilation
+namespace compilation.AppSettings
 {
     public class AppSettings
     {
@@ -63,11 +63,12 @@ namespace compilation
         public bool Test3 { get; set; }
         public Test4 Test4 { get; set; }
         public decimal Test7 { get; set; }
+        public decimal Test7_1 { get; set; }
     }
 
     public class Test4
     {
-        public string Test4_1 { get; set; }
+        public string Test41 { get; set; }
     }
 
 }";
