@@ -54,7 +54,7 @@ namespace SourceGenerator.Demo
     {
         var expected = @"// Auto-generated code
 
-namespace compilation.AppSettings
+namespace compilation.Configuration
 {
     public class AppSettings
     {

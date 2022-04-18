@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using SourceGenerator.Demo.Configuration;
 
 namespace SourceGenerator.Demo;
 
@@ -9,7 +10,7 @@ class Program
         var autoPropertyClass = new AutoPropertyClass();
         Console.WriteLine(autoPropertyClass.Test);
         Console.WriteLine(autoPropertyClass.Test2);
-        Console.WriteLine(AppSettings.Test3);
+        Console.WriteLine(new AppSettings().Test3);
         var autoArgsClass = new AutoArgsClass("test", "test2", autoPropertyClass);
         var services = new ServiceCollection();
         services.AddAutoServices();

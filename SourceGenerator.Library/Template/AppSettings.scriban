@@ -28,7 +28,7 @@ end
 
 // Auto-generated code
 
-namespace {{ Model.Namespace }}.{{ Model.Class.Name }}
+namespace {{ Model.Namespace }}
 {
     {{~ RenderClass Model.Class ~}}
 }

@@ -35,7 +35,7 @@ namespace SourceGenerator.Library
             classInfo.Name = "AppSettings";
             var appSettings = new AppSettingsModel()
             {
-                Namespace = context.Compilation.AssemblyName,
+                Namespace = context.Compilation.AssemblyName + ".Configuration",
                 Class = classInfo,
             };
             context.AddSource("AppSettings.g.cs", RenderUtils.Render("AppSettings", appSettings));
