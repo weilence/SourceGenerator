@@ -58,11 +58,18 @@ namespace compilation
 {
     public class AppSettings
     {
-        public const string Test = ""1"";
-        public const int Test2 = 2;
-        public const bool Test3 = true;
-        public const decimal Test7 = 7.0;
+        public string Test { get; set; }
+        public int Test2 { get; set; }
+        public bool Test3 { get; set; }
+        public Test4 Test4 { get; set; }
+        public decimal Test7 { get; set; }
     }
+
+    public class Test4
+    {
+        public string Test4_1 { get; set; }
+    }
+
 }";
 
         var actual = Run<AutoAppSettingsGenerator>("");

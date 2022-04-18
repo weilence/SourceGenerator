@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
+﻿using System.IO;
 using System.Text.Json;
 using Microsoft.CodeAnalysis;
 using SourceGenerator.Library.Template;
@@ -32,27 +30,13 @@ namespace SourceGenerator.Library
             var appSettingsFile = File.ReadAllText(path);
 
             var rootElement = JsonDocument.Parse(appSettingsFile).RootElement;
-            var columns = new List<Column>();
-            foreach (var jsonProperty in rootElement.EnumerateObject())
-            {
-                var (type, value) = JsonUtils.GetTypeAndValue(jsonProperty);
-                if (type == null)
-                {
-                    continue;
-                }
+            var classInfo = JsonUtils.ParseJson(rootElement);
 
-                columns.Add(new Column()
-                {
-                    Name = jsonProperty.Name,
-                    Value = value,
-                    Type = type
-                });
-            }
-
+            classInfo.Name = "AppSettings";
             var appSettings = new AppSettingsModel()
             {
                 Namespace = context.Compilation.AssemblyName,
-                Columns = columns,
+                Class = classInfo,
             };
             context.AddSource("AppSettings.g.cs", RenderUtils.Render("AppSettings", appSettings));
         }

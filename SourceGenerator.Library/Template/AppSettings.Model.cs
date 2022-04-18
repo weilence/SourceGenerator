@@ -6,17 +6,24 @@ namespace SourceGenerator.Library.Template
     {
         public string Namespace { get; set; }
 
-        public string Class { get; set; } = "AppSettings";
-
-        public List<Column> Columns { get; set; }
+        public ClassInfo Class { get; set; }
     }
 
-    public class Column
+    public class ClassInfo
+    {
+        public string Name { get; set; }
+        
+        public List<PropertyInfo> Properties { get; set; }
+    }
+
+    public class PropertyInfo
     {
         public string Name { get; set; }
 
         public string Type { get; set; }
 
         public string Value { get; set; }
+        
+        public ClassInfo Class { get; set; }
     }
 }

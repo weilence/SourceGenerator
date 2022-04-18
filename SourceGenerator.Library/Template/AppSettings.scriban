@@ -1,13 +1,34 @@
+{{-
+func RenderClass
+    class = $0
+~}}
+    public class {{ class.Name }}
+    {
+        {{~ for property in class.Properties; RenderProperty property; end ~}}
+    }
+
+{{~
+    for property in class.Properties
+        if property.Class
+            RenderClass property.Class
+        end
+    end
+end
+-}}
+
+{{-
+func RenderProperty
+    property = $0
+    if !property.Type; ret; end
+~}}
+        public {{ property.Type }} {{ property.Name }} { get; set; }
+{{~
+end
+-}}
+
 // Auto-generated code
 
 namespace {{ Model.Namespace }}
 {
-    public class {{ Model.Class }}
-    {
-{{~ for column in Model.Columns ~}}
-    {{~ if column.Type ~}}
-        public const {{ column.Type }} {{ column.Name }} = {{ column.Type == "string" ? "\"" + column.Value + "\"" : column.Value }};
-    {{~ end ~}}
-{{~ end ~}}
-    }
+    {{~ RenderClass Model.Class ~}}
 }
