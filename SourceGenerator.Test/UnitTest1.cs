@@ -97,7 +97,7 @@ namespace SourceGenerator.Demo
         private const string test4;
     }
 
-    [Args]
+    [Args(Init = ""Init""]
     public partial class UserClass2
     {
         private string _test;
@@ -110,6 +110,11 @@ namespace SourceGenerator.Demo
 
         [ArgsIgnore]
         public string test6;
+
+        public void Init()
+        {
+            test5 = ""test5"";
+        }
     }
 }";
         var expected = @"// Auto-generated code
@@ -139,6 +144,7 @@ namespace SourceGenerator.Demo
             this._test = a0;
             this._test2 = a1;
             this._test3 = a2;
+            this.Init();
         }
     }
 }";

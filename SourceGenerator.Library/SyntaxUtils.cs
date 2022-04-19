@@ -29,18 +29,17 @@ namespace SourceGenerator.Library
             }
         }
 
-        public static bool HasAttribute(FieldDeclarationSyntax fieldDeclaration, Func<string, bool> func)
+        public static bool HasAttribute(MemberDeclarationSyntax classDeclaration, Func<string, bool> func)
         {
-            return fieldDeclaration.AttributeLists.SelectMany(m => m.Attributes)
-                .Any(m => func(m.Name.ToString()));
+            return GetAttribute(classDeclaration, func) != null;
         }
 
-        public static bool HasAttribute(ClassDeclarationSyntax classDeclaration, Func<string, bool> func)
+        public static AttributeSyntax GetAttribute(MemberDeclarationSyntax classDeclaration, Func<string, bool> func)
         {
             return classDeclaration.AttributeLists.SelectMany(m => m.Attributes)
-                .Any(m => func(m.Name.ToString()));
+                .FirstOrDefault(m => func(m.Name.ToString()));
         }
-        
+
         public static List<string> GetUsings(ClassDeclarationSyntax classDeclarationSyntax)
         {
             var compilationUnitSyntax = classDeclarationSyntax.SyntaxTree.GetRoot() as CompilationUnitSyntax;

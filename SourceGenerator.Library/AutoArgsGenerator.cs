@@ -46,8 +46,15 @@ namespace SourceGenerator.Library
                     continue;
                 }
 
-                var classHasAttribute =
-                    SyntaxUtils.HasAttribute(classDeclarationSyntax, name => receiver.Names.Contains(name));
+                string initMethod = null;
+                var attributeSyntax =
+                    SyntaxUtils.GetAttribute(classDeclarationSyntax, name => receiver.Names.Contains(name));
+                var expression = attributeSyntax?.ArgumentList?.Arguments[0].Expression;
+                if (expression != null && (expression is InvocationExpressionSyntax || expression is LiteralExpressionSyntax))
+                {
+                    var semanticModel = context.Compilation.GetSemanticModel(classDeclarationSyntax.SyntaxTree);
+                    initMethod = semanticModel.GetConstantValue(expression).Value as string;
+                }
 
                 var fields = new List<Field>();
                 foreach (var fieldDeclaration in fieldDeclarationList)
@@ -67,7 +74,7 @@ namespace SourceGenerator.Library
                     var fieldIgnoreAttribute = SyntaxUtils.HasAttribute(fieldDeclaration,
                         name => new[] { nameof(ArgsIgnoreAttribute), ArgsIgnoreAttribute.Name }.Contains(name));
 
-                    if (!(fieldHasAttribute || classHasAttribute && !fieldIgnoreAttribute))
+                    if (!(fieldHasAttribute || attributeSyntax != null && !fieldIgnoreAttribute))
                     {
                         continue;
                     }
@@ -91,12 +98,13 @@ namespace SourceGenerator.Library
                 }
 
                 var usings = SyntaxUtils.GetUsings(classDeclarationSyntax);
-                var model = new ClassModel()
+                var model = new AutoArgsModel()
                 {
                     Usings = usings,
                     Namespace = SyntaxUtils.GetName(namespaceDeclarationSyntax),
                     Class = SyntaxUtils.GetName(classDeclarationSyntax),
-                    Fields = fields
+                    Fields = fields,
+                    Init = initMethod,
                 };
 
                 context.AddSource($"{model.Class}.g.cs", RenderUtils.Render("AutoArgs", model));

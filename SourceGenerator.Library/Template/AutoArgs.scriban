@@ -15,6 +15,9 @@ namespace {{ Model.Namespace }}
         {
 {{~ for field in Model.Fields ~}}
             this.{{ field.Name }} = a{{ for.index }};
+{{~ end
+    if Model.Init ~}}
+            this.Init();
 {{~ end ~}}
         }
     }
