@@ -89,10 +89,10 @@ namespace SourceGenerator.Demo
     public partial class UserClass
     {
         [Args]
-        private string _test;
+        private UserClass2 _test;
 
         [Args]
-        private string _test2, _test3;
+        private UserClass2 _test2, _test3;
 
         private const string test4;
     }
@@ -100,16 +100,18 @@ namespace SourceGenerator.Demo
     [Args(Init = ""Init""]
     public partial class UserClass2
     {
-        private string _test;
+        private UserClass _test;
 
-        private string _test2, _test3;
+        private UserClass _test2, _test3;
 
         private const string test4;
 
-        public string test5;
+        private string test5;
 
         [ArgsIgnore]
         public string test6;
+
+        public UserClass _test7;
 
         public void Init()
         {
@@ -124,7 +126,7 @@ namespace SourceGenerator.Demo
 {
     public partial class UserClass
     {
-        public UserClass(string a0, string a1, string a2)
+        public UserClass(UserClass2 a0, UserClass2 a1, UserClass2 a2)
         {
             this._test = a0;
             this._test2 = a1;
@@ -139,7 +141,7 @@ namespace SourceGenerator.Demo
 {
     public partial class UserClass2
     {
-        public UserClass2(string a0, string a1, string a2)
+        public UserClass2(UserClass a0, UserClass a1, UserClass a2)
         {
             this._test = a0;
             this._test2 = a1;

@@ -46,13 +46,14 @@ namespace SourceGenerator.Library
                     continue;
                 }
 
+                var semanticModel = context.Compilation.GetSemanticModel(classDeclarationSyntax.SyntaxTree);
+
                 string initMethod = null;
                 var attributeSyntax =
                     SyntaxUtils.GetAttribute(classDeclarationSyntax, name => receiver.Names.Contains(name));
                 var expression = attributeSyntax?.ArgumentList?.Arguments[0].Expression;
                 if (expression != null && (expression is InvocationExpressionSyntax || expression is LiteralExpressionSyntax))
                 {
-                    var semanticModel = context.Compilation.GetSemanticModel(classDeclarationSyntax.SyntaxTree);
                     initMethod = semanticModel.GetConstantValue(expression).Value as string;
                 }
 
@@ -80,6 +81,11 @@ namespace SourceGenerator.Library
                     }
 
                     var type = fieldDeclaration.Declaration.Type.ToString();
+                    var typeInfo = semanticModel.GetTypeInfo(fieldDeclaration.Declaration.Type);
+                    if (typeInfo.Type?.ContainingNamespace.Name == "System")
+                    {
+                        continue;
+                    }
 
                     foreach (var declarationVariable in fieldDeclaration.Declaration.Variables)
                     {
