@@ -8,5 +8,7 @@ namespace SourceGenerator.Common
         public const string Name = "Args";
 
         public string Init { get; set; }
+
+        public bool IsOptions { get; set; }
     }
 }

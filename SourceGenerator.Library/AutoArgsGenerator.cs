@@ -48,14 +48,11 @@ namespace SourceGenerator.Library
 
                 var semanticModel = context.Compilation.GetSemanticModel(classDeclarationSyntax.SyntaxTree);
 
-                string initMethod = null;
                 var attributeSyntax =
                     SyntaxUtils.GetAttribute(classDeclarationSyntax, name => receiver.Names.Contains(name));
-                var expression = attributeSyntax?.ArgumentList?.Arguments[0].Expression;
-                if (expression != null && (expression is InvocationExpressionSyntax || expression is LiteralExpressionSyntax))
-                {
-                    initMethod = semanticModel.GetConstantValue(expression).Value as string;
-                }
+
+                var classAttributeValue = SemanticUtils.GetAttributeValue(semanticModel, attributeSyntax);
+                var hasOptions = false;
 
                 var fields = new List<Field>();
                 foreach (var fieldDeclaration in fieldDeclarationList)
@@ -70,15 +67,19 @@ namespace SourceGenerator.Library
                         continue;
                     }
 
-                    var fieldHasAttribute =
-                        SyntaxUtils.HasAttribute(fieldDeclaration, name => receiver.Names.Contains(name));
+                    var fieldAttribute =
+                        SyntaxUtils.GetAttribute(fieldDeclaration, name => receiver.Names.Contains(name));
                     var fieldIgnoreAttribute = SyntaxUtils.HasAttribute(fieldDeclaration,
                         name => new[] { nameof(ArgsIgnoreAttribute), ArgsIgnoreAttribute.Name }.Contains(name));
 
-                    if (!(fieldHasAttribute || attributeSyntax != null && !fieldIgnoreAttribute))
+                    if (!(fieldAttribute != null || attributeSyntax != null && !fieldIgnoreAttribute))
                     {
                         continue;
                     }
+
+                    var fieldAttributeValue = fieldAttribute == null
+                        ? new Dictionary<string, string>()
+                        : SemanticUtils.GetAttributeValue(semanticModel, fieldAttribute);
 
                     var type = fieldDeclaration.Declaration.Type.ToString();
                     var typeInfo = semanticModel.GetTypeInfo(fieldDeclaration.Declaration.Type);
@@ -87,13 +88,20 @@ namespace SourceGenerator.Library
                         continue;
                     }
 
+                    var isOptions = fieldAttributeValue.GetValueOrDefault("IsOptions") == "True";
+                    if (isOptions)
+                    {
+                        hasOptions = true;
+                    }
+
                     foreach (var declarationVariable in fieldDeclaration.Declaration.Variables)
                     {
                         var name = SyntaxUtils.GetName(declarationVariable);
                         fields.Add(new Field()
                         {
                             Name = name,
-                            Type = type
+                            Type = type,
+                            IsOptions = isOptions,
                         });
                     }
                 }
@@ -104,13 +112,18 @@ namespace SourceGenerator.Library
                 }
 
                 var usings = SyntaxUtils.GetUsings(classDeclarationSyntax);
+                if (hasOptions && !usings.Contains("using Microsoft.Extensions.Options;"))
+                {
+                    usings.Add("using Microsoft.Extensions.Options;");
+                }
+
                 var model = new AutoArgsModel()
                 {
                     Usings = usings,
                     Namespace = SyntaxUtils.GetName(namespaceDeclarationSyntax),
                     Class = SyntaxUtils.GetName(classDeclarationSyntax),
                     Fields = fields,
-                    Init = initMethod,
+                    Init = classAttributeValue.GetValueOrDefault(nameof(ArgsAttribute.Init)),
                 };
 
                 context.AddSource($"{model.Class}.g.cs", RenderUtils.Render("AutoArgs", model));

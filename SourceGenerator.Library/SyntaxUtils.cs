@@ -24,6 +24,8 @@ namespace SourceGenerator.Library
                     return baseNamespaceDeclarationSyntax.Name.ToString();
                 case VariableDeclaratorSyntax variableDeclaratorSyntax:
                     return variableDeclaratorSyntax.Identifier.Text;
+                case NameEqualsSyntax nameEqualsSyntax:
+                    return nameEqualsSyntax.Name.Identifier.Text;
                 default:
                     throw new NotImplementedException();
             }

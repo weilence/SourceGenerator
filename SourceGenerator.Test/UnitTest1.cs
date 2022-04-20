@@ -104,6 +104,9 @@ namespace SourceGenerator.Demo
 
         private UserClass _test2, _test3;
 
+        [Args(IsOptions = true)]
+        private UserClass _test31;
+
         private const string test4;
 
         private string test5;
@@ -136,16 +139,18 @@ namespace SourceGenerator.Demo
 }";
         var expected2 = @"// Auto-generated code
 using SourceGenerator.Common;
+using Microsoft.Extensions.Options;
 
 namespace SourceGenerator.Demo
 {
     public partial class UserClass2
     {
-        public UserClass2(UserClass a0, UserClass a1, UserClass a2)
+        public UserClass2(UserClass a0, UserClass a1, UserClass a2, IOptions<UserClass> a3)
         {
             this._test = a0;
             this._test2 = a1;
             this._test3 = a2;
+            this._test31 = a3.Value;
             this.Init();
         }
     }

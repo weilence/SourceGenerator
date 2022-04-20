@@ -11,7 +11,7 @@ class Program
         Console.WriteLine(autoPropertyClass.Test);
         Console.WriteLine(autoPropertyClass.Test2);
         Console.WriteLine(new AppSettings().Test3);
-        var autoArgsClass = new AutoArgsClass("test", "test2", autoPropertyClass);
+        var autoArgsClass = new AutoArgsClass(autoPropertyClass);
         var services = new ServiceCollection();
         services.AddAutoServices();
     }

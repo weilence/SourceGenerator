@@ -17,5 +17,6 @@ namespace SourceGenerator.Library.Template
         public string Type { get; set; }
 
         public string Name { get; set; }
+        public bool IsOptions { get; set; }
     }
 }
