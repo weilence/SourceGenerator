@@ -3,8 +3,8 @@
 namespace SourceGenerator.Common
 {
     [AttributeUsage(AttributeTargets.Field)]
-    public class ArgsIgnoreAttribute : Attribute
+    public class ValueAttribute : Attribute
     {
-        public const string Name = "ArgsIgnore";
+        public const string Name = "Value";
     }
 }

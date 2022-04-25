@@ -2,7 +2,7 @@
 func RenderClass
     class = $0
 ~}}
-    public class {{ class.Name }}
+    public partial class {{ class.Name }}
     {
         {{~ for property in class.Properties; RenderProperty property; end ~}}
     }

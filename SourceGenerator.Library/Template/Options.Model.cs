@@ -2,7 +2,7 @@
 
 namespace SourceGenerator.Library.Template
 {
-    public class AppSettingsModel
+    public class OptionsModel
     {
         public string Namespace { get; set; }
 

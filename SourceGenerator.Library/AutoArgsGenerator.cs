@@ -14,7 +14,7 @@ namespace SourceGenerator.Library
         public void Initialize(GeneratorInitializationContext context)
         {
             context.RegisterForSyntaxNotifications(() =>
-                new FieldAttributeReceiver(new List<string> { nameof(ArgsAttribute), ArgsAttribute.Name }));
+                new FieldAttributeReceiver(new List<string> { nameof(ServiceAttribute), ServiceAttribute.Name }));
         }
 
         public void Execute(GeneratorExecutionContext context)
@@ -62,17 +62,16 @@ namespace SourceGenerator.Library
                         continue;
                     }
 
-                    if (!SyntaxUtils.HasModifier(fieldDeclaration, SyntaxKind.PrivateKeyword))
+                    if (!SyntaxUtils.HasModifiers(fieldDeclaration, SyntaxKind.PrivateKeyword,
+                            SyntaxKind.ReadOnlyKeyword))
                     {
                         continue;
                     }
 
                     var fieldAttribute =
                         SyntaxUtils.GetAttribute(fieldDeclaration, name => receiver.Names.Contains(name));
-                    var fieldIgnoreAttribute = SyntaxUtils.HasAttribute(fieldDeclaration,
-                        name => new[] { nameof(ArgsIgnoreAttribute), ArgsIgnoreAttribute.Name }.Contains(name));
 
-                    if (!(fieldAttribute != null || attributeSyntax != null && !fieldIgnoreAttribute))
+                    if (fieldAttribute == null && attributeSyntax == null)
                     {
                         continue;
                     }
@@ -88,8 +87,9 @@ namespace SourceGenerator.Library
                         continue;
                     }
 
-                    var isOptions = fieldAttributeValue.GetValueOrDefault("IsOptions") == "True";
-                    if (isOptions)
+                    var isValue = SyntaxUtils.HasAttribute(fieldDeclaration,
+                        name => name == ValueAttribute.Name || name == nameof(ValueAttribute));
+                    if (isValue)
                     {
                         hasOptions = true;
                     }
@@ -101,7 +101,7 @@ namespace SourceGenerator.Library
                         {
                             Name = name,
                             Type = type,
-                            IsOptions = isOptions,
+                            IsOptions = isValue,
                         });
                     }
                 }
@@ -123,7 +123,7 @@ namespace SourceGenerator.Library
                     Namespace = SyntaxUtils.GetName(namespaceDeclarationSyntax),
                     Class = SyntaxUtils.GetName(classDeclarationSyntax),
                     Fields = fields,
-                    Init = classAttributeValue.GetValueOrDefault(nameof(ArgsAttribute.Init)),
+                    Init = classAttributeValue.GetValueOrDefault(nameof(ServiceAttribute.Init)),
                 };
 
                 context.AddSource($"{model.Class}.g.cs", RenderUtils.Render("AutoArgs", model));

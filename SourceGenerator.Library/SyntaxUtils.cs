@@ -13,6 +13,12 @@ namespace SourceGenerator.Library
         {
             return syntax.Modifiers.Any(m => modifiers.Contains(m.Kind()));
         }
+        
+        
+        public static bool HasModifiers(MemberDeclarationSyntax syntax, params SyntaxKind[] modifiers)
+        {
+            return syntax.Modifiers.All(m => modifiers.Contains(m.Kind()));
+        }
 
         public static string GetName(SyntaxNode syntaxNode)
         {

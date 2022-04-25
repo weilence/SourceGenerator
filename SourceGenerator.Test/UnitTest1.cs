@@ -50,13 +50,24 @@ namespace SourceGenerator.Demo
     }
 
     [Fact]
-    public void TestAutoAppSettings()
+    public void TestAutoOptions()
     {
+        var source = @"
+using SourceGenerator.Common;
+
+namespace compilation
+{
+    [Options(Path = ""appsettings.json"")]
+    public partial class AppSettings
+    {
+    }
+}";
+
         var expected = @"// Auto-generated code
 
-namespace compilation.Configuration
+namespace compilation
 {
-    public class AppSettings
+    public partial class AppSettings
     {
         public string Test { get; set; }
         public int Test2 { get; set; }
@@ -66,14 +77,14 @@ namespace compilation.Configuration
         public decimal Test7_1 { get; set; }
     }
 
-    public class Test4
+    public partial class Test4
     {
         public string Test41 { get; set; }
     }
 
 }";
 
-        var actual = Run<AutoAppSettingsGenerator>("");
+        var actual = Run<AutoOptionsGenerator>(source);
 
         Assert.Equal(expected, actual[0]);
     }
@@ -86,32 +97,30 @@ using SourceGenerator.Common;
 
 namespace SourceGenerator.Demo
 {
+    [Service]
     public partial class UserClass
     {
-        [Args]
-        private UserClass2 _test;
+        private readonly UserClass2 _test;
 
-        [Args]
-        private UserClass2 _test2, _test3;
+        private readonly UserClass2 _test2, _test3;
 
         private const string test4;
     }
 
-    [Args(Init = ""Init""]
+    [Service(Init = ""Init""]
     public partial class UserClass2
     {
-        private UserClass _test;
+        private readonly UserClass _test;
 
-        private UserClass _test2, _test3;
+        private readonly UserClass _test2, _test3;
 
-        [Args(IsOptions = true)]
-        private UserClass _test31;
+        [Value]
+        private readonly UserClass _test31;
 
         private const string test4;
 
         private string test5;
 
-        [ArgsIgnore]
         public string test6;
 
         public UserClass _test7;

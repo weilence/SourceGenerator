@@ -2,17 +2,19 @@
 
 namespace SourceGenerator.Demo;
 
-[Args(Init = nameof(Init))]
+[Service(Init = nameof(Init))]
 public partial class AutoArgsClass
 {
-    [Args] private string _test = "test";
+    private readonly string _test = "test";
 
-    [Args] private string _test2 = "test2";
-    
-    [Args] private AutoPropertyClass _autoPropertyClass;
+    private readonly string _test2 = "test2";
+
+    private readonly AutoPropertyClass _autoPropertyClass;
+
+    private string _test4;
 
     public void Init()
     {
-        _test2 = "_test3";
+        _test4 = "_test3";
     }
 }
