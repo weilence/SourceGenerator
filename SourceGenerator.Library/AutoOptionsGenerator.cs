@@ -3,6 +3,7 @@ using System.IO;
 using System.Text.Json;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SourceGenerator.Common;
 using SourceGenerator.Library.Template;
 
@@ -65,10 +66,13 @@ namespace SourceGenerator.Library
                 var rootElement = JsonDocument.Parse(appSettingsFile).RootElement;
                 var classInfo = JsonUtils.ParseJson(rootElement);
 
+                var baseNamespaceDeclarationSyntax =
+                    classDeclarationSyntax.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>();
+                var namespaceName = SyntaxUtils.GetName(baseNamespaceDeclarationSyntax);
                 classInfo.Name = SyntaxUtils.GetName(classDeclarationSyntax);
                 var appSettings = new OptionsModel()
                 {
-                    Namespace = context.Compilation.AssemblyName,
+                    Namespace = namespaceName,
                     Class = classInfo,
                 };
                 context.AddSource(classInfo.Name + ".g.cs", RenderUtils.Render("Options", appSettings));

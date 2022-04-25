@@ -76,10 +76,6 @@ namespace SourceGenerator.Library
                         continue;
                     }
 
-                    var fieldAttributeValue = fieldAttribute == null
-                        ? new Dictionary<string, string>()
-                        : SemanticUtils.GetAttributeValue(semanticModel, fieldAttribute);
-
                     var type = fieldDeclaration.Declaration.Type.ToString();
                     var typeInfo = semanticModel.GetTypeInfo(fieldDeclaration.Declaration.Type);
                     if (typeInfo.Type?.ContainingNamespace.Name == "System")
