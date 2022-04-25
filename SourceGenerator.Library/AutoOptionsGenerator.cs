@@ -12,6 +12,8 @@ namespace SourceGenerator.Library
     [Generator]
     public class AutoOptionsGenerator : ISourceGenerator
     {
+        public static Dictionary<string, string> namePath = new Dictionary<string, string>();
+
         public void Initialize(GeneratorInitializationContext context)
         {
             context.RegisterForSyntaxNotifications(() =>
@@ -20,12 +22,6 @@ namespace SourceGenerator.Library
 
         public void Execute(GeneratorExecutionContext context)
         {
-            if (!context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.projectdir",
-                    out var projectDir))
-            {
-                return;
-            }
-
             var receiver = (FieldAttributeReceiver)context.SyntaxReceiver;
             var syntaxList = receiver.AttributeSyntaxList;
 
@@ -36,11 +32,28 @@ namespace SourceGenerator.Library
 
             foreach (var classDeclarationSyntax in syntaxList)
             {
+                var classInfoName = SyntaxUtils.GetName(classDeclarationSyntax);
+
+                if (!context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.projectdir",
+                        out var projectDir))
+                {
+                    if (!namePath.ContainsKey(classInfoName))
+                    {
+                        return;
+                    }
+
+                    projectDir = namePath[classInfoName];
+                }
+                else
+                {
+                    namePath[classInfoName] = projectDir;
+                }
+
                 if (!SyntaxUtils.HasModifier(classDeclarationSyntax, SyntaxKind.PartialKeyword))
                 {
                     context.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.SGL001,
                         classDeclarationSyntax.GetLocation(),
-                        SyntaxUtils.GetName(classDeclarationSyntax)));
+                        classInfoName));
                     continue;
                 }
 
@@ -69,7 +82,7 @@ namespace SourceGenerator.Library
                 var baseNamespaceDeclarationSyntax =
                     classDeclarationSyntax.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>();
                 var namespaceName = SyntaxUtils.GetName(baseNamespaceDeclarationSyntax);
-                classInfo.Name = SyntaxUtils.GetName(classDeclarationSyntax);
+                classInfo.Name = classInfoName;
                 var appSettings = new OptionsModel()
                 {
                     Namespace = namespaceName,

@@ -13,5 +13,8 @@ class Program
         var services = new ServiceCollection();
         services.AddOptions<AppSettings>().BindConfiguration("");
         services.AddAutoServices();
+        var appSettings = new AppSettings();
+        appSettings.Test = "test";
+        appSettings.Test3 = "test";
     }
 }

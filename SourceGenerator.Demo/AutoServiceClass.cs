@@ -3,7 +3,7 @@
 namespace SourceGenerator.Demo;
 
 [Service]
-public class AutoServiceClass
+public partial class AutoServiceClass
 {
     
 }
