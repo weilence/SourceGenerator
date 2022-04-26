@@ -8,5 +8,7 @@ namespace SourceGenerator.Common
         public const string Name = "Service";
 
         public string Init { get; set; }
+        
+        public Type Type { get; set; }
     }
 }

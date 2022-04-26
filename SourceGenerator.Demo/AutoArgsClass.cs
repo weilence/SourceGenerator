@@ -2,8 +2,12 @@
 
 namespace SourceGenerator.Demo;
 
-[Service]
-public partial class AutoArgsClass
+[Service(Type = typeof(IAutoArgsClass))]
+public partial class AutoArgsClass : IAutoArgsClass
 {
     private readonly AutoPropertyClass _autoPropertyClass;
+}
+
+public interface IAutoArgsClass
+{
 }

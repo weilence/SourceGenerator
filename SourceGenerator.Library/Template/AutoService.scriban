@@ -1,5 +1,5 @@
 // Auto-generated code
-{{~ for namespace in Model.ClassList | array.map 'Namespace' | array.uniq ~}}
+{{~ for namespace in Model.ClassList | array.map 'Namespace' | array.concat Model.Namespaces | array.uniq ~}}
     {{~ "using " + namespace + ";" }}
 {{~ end ~}}
 
@@ -9,9 +9,15 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddAutoServices(this IServiceCollection services)
         {
-{{~ for class in Model.ClassList ~}}
+{{~
+for class in Model.ClassList
+    if class.Type ~}}
+            services.AddSingleton<{{ class.Type }}, {{ class.Class }}>();
+    {{~ else ~}}
             services.AddSingleton<{{ class.Class }}>();
-{{~ end ~}}
+    {{~ end
+end
+~}}
             return services;
         }
     }

@@ -186,7 +186,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddSingleton<AutoServiceClass>();
             services.AddSingleton<AutoServiceClass2>();
-            services.AddSingleton<AutoServiceClass3>();
+            services.AddSingleton<IAutoServiceClass, AutoServiceClass3>();
             return services;
         }
     }
@@ -210,7 +210,11 @@ public class AutoServiceClass2
     
 }
 
-[Service]
+public interface IAutoServiceClass
+{
+}
+
+[Service(Type = typeof(IAutoServiceClass))]
 public class AutoServiceClass3
 {
     

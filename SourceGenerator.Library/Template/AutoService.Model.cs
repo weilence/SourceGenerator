@@ -4,6 +4,7 @@ namespace SourceGenerator.Library.Template
 {
     public class AutoServiceModel
     {
+        public List<string> Namespaces { get; set; }
         public List<AutoServiceModelItem> ClassList { get; set; }
     }
 
@@ -12,5 +13,7 @@ namespace SourceGenerator.Library.Template
         public string Namespace { get; set; }
 
         public string Class { get; set; }
+
+        public string Type { get; set; }
     }
 }

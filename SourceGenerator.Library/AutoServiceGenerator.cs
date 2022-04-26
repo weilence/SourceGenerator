@@ -26,18 +26,48 @@ namespace SourceGenerator.Library
             }
 
             var classList = new List<AutoServiceModelItem>();
+            var namespaces = new List<string>();
             foreach (var classDeclarationSyntax in syntaxList)
             {
+                var attributeSyntax =
+                    SyntaxUtils.GetAttribute(classDeclarationSyntax, name => receiver.Names.Contains(name));
+                if (attributeSyntax == null)
+                {
+                    continue;
+                }
+
                 var baseNamespaceDeclarationSyntax =
                     classDeclarationSyntax.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>();
                 var namespaceName = SyntaxUtils.GetName(baseNamespaceDeclarationSyntax);
                 var className = SyntaxUtils.GetName(classDeclarationSyntax);
 
-                classList.Add(new AutoServiceModelItem()
+                var semanticModel = context.Compilation.GetSemanticModel(classDeclarationSyntax.SyntaxTree);
+
+                var modelItem = new AutoServiceModelItem()
                 {
                     Class = className,
                     Namespace = namespaceName,
-                });
+                };
+
+                var argumentListArguments = attributeSyntax.ArgumentList?.Arguments;
+                if (argumentListArguments != null)
+                {
+                    foreach (var argumentSyntax in argumentListArguments)
+                    {
+                        if (SyntaxUtils.GetName(argumentSyntax.NameEquals) == nameof(ServiceAttribute.Type))
+                        {
+                            if (argumentSyntax.Expression is TypeOfExpressionSyntax typeOfExpressionSyntax)
+                            {
+                                var typeSyntax = typeOfExpressionSyntax.Type;
+                                var typeInfo = semanticModel.GetTypeInfo(typeSyntax);
+                                namespaces.Add(typeInfo.Type.ContainingNamespace.ToString());
+                                modelItem.Type = typeInfo.Type.Name;
+                            }
+                        }
+                    }
+                }
+
+                classList.Add(modelItem);
             }
 
             if (classList.Count == 0)
@@ -47,6 +77,7 @@ namespace SourceGenerator.Library
 
             var model = new AutoServiceModel()
             {
+                Namespaces = namespaces,
                 ClassList = classList
             };
 
