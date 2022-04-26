@@ -121,6 +121,8 @@ namespace SourceGenerator.Demo
 
         private string test5;
 
+        private Dictionary<string, string> dic;
+
         public string test6;
 
         public UserClass _test7;
