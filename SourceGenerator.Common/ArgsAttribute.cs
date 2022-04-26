@@ -3,9 +3,9 @@
 namespace SourceGenerator.Common
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class ControllerAttribute : Attribute
+    public class ArgsAttribute : Attribute
     {
-        public const string Name = "Controller";
+        public const string Name = "Args";
 
         public string Init { get; set; }
     }

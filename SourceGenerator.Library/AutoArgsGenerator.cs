@@ -16,7 +16,7 @@ namespace SourceGenerator.Library
             context.RegisterForSyntaxNotifications(() =>
                 new FieldAttributeReceiver(new List<string>
                 {
-                    nameof(ControllerAttribute), ControllerAttribute.Name, nameof(ServiceAttribute),
+                    nameof(ArgsAttribute), ArgsAttribute.Name, nameof(ServiceAttribute),
                     ServiceAttribute.Name
                 }));
         }
@@ -123,7 +123,7 @@ namespace SourceGenerator.Library
                     Namespace = SyntaxUtils.GetName(namespaceDeclarationSyntax),
                     Class = SyntaxUtils.GetName(classDeclarationSyntax),
                     Fields = fields,
-                    Init = classAttributeValue.GetValueOrDefault(nameof(ControllerAttribute.Init)),
+                    Init = classAttributeValue.GetValueOrDefault(nameof(ArgsAttribute.Init)),
                 };
 
                 context.AddSource($"{model.Class}.g.cs", RenderUtils.Render("AutoArgs", model));
