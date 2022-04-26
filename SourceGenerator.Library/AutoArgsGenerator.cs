@@ -14,7 +14,11 @@ namespace SourceGenerator.Library
         public void Initialize(GeneratorInitializationContext context)
         {
             context.RegisterForSyntaxNotifications(() =>
-                new FieldAttributeReceiver(new List<string> { nameof(ServiceAttribute), ServiceAttribute.Name }));
+                new FieldAttributeReceiver(new List<string>
+                {
+                    nameof(ControllerAttribute), ControllerAttribute.Name, nameof(ServiceAttribute),
+                    ServiceAttribute.Name
+                }));
         }
 
         public void Execute(GeneratorExecutionContext context)
@@ -119,7 +123,7 @@ namespace SourceGenerator.Library
                     Namespace = SyntaxUtils.GetName(namespaceDeclarationSyntax),
                     Class = SyntaxUtils.GetName(classDeclarationSyntax),
                     Fields = fields,
-                    Init = classAttributeValue.GetValueOrDefault(nameof(ServiceAttribute.Init)),
+                    Init = classAttributeValue.GetValueOrDefault(nameof(ControllerAttribute.Init)),
                 };
 
                 context.AddSource($"{model.Class}.g.cs", RenderUtils.Render("AutoArgs", model));
