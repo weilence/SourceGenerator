@@ -26,7 +26,6 @@ namespace SourceGenerator.Library
             }
 
             var classList = new List<AutoServiceModelItem>();
-            var namespaces = new List<string>();
             foreach (var classDeclarationSyntax in syntaxList)
             {
                 var attributeSyntax =
@@ -45,8 +44,7 @@ namespace SourceGenerator.Library
 
                 var modelItem = new AutoServiceModelItem()
                 {
-                    Class = className,
-                    Namespace = namespaceName,
+                    Class = namespaceName + "." + className,
                 };
 
                 var argumentListArguments = attributeSyntax.ArgumentList?.Arguments;
@@ -60,8 +58,7 @@ namespace SourceGenerator.Library
                             {
                                 var typeSyntax = typeOfExpressionSyntax.Type;
                                 var typeInfo = semanticModel.GetTypeInfo(typeSyntax);
-                                namespaces.Add(typeInfo.Type.ContainingNamespace.ToString());
-                                modelItem.Type = typeInfo.Type.Name;
+                                modelItem.Type = typeInfo.Type.ToString();
                             }
                         }
                     }
@@ -77,7 +74,6 @@ namespace SourceGenerator.Library
 
             var model = new AutoServiceModel()
             {
-                Namespaces = namespaces,
                 ClassList = classList
             };
 

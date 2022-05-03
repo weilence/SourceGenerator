@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Xunit;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Testing;
+using Microsoft.Extensions.DependencyInjection;
 using SourceGenerator.Common;
 using SourceGenerator.Library;
 
@@ -177,8 +180,6 @@ namespace SourceGenerator.Demo
     public void TestAutoService()
     {
         var expected = @"// Auto-generated code
-using SourceGenerator.Demo;
-using SourceGenerator.Demo2;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -186,16 +187,17 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddAutoServices(this IServiceCollection services)
         {
-            services.AddSingleton<AutoServiceClass>();
-            services.AddSingleton<AutoServiceClass2>();
-            services.AddSingleton<IAutoServiceClass, AutoServiceClass3>();
+            services.AddSingleton<SourceGenerator.Demo.AutoServiceClass>();
+            services.AddSingleton<SourceGenerator.Demo2.AutoServiceClass2>();
+            services.AddSingleton<SourceGenerator.Demo2.IAutoServiceClass, SourceGenerator.Demo2.AutoServiceClass3>();
             return services;
         }
     }
 }";
         var source = new[]
         {
-            @"
+            @"using SourceGenerator.Common;
+
 namespace SourceGenerator.Demo;
 
 [Service]
@@ -203,7 +205,8 @@ public class AutoServiceClass
 {
     
 }",
-            @"
+            @"using SourceGenerator.Common;
+
 namespace SourceGenerator.Demo2;
 
 [Service]
@@ -243,6 +246,12 @@ public class AutoServiceClass3
             )
             .RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
 
+        var outDiagnostics = outputCompilation.GetDiagnostics();
+        foreach (var diagnostic in outDiagnostics)
+        {
+            
+        }
+        
         var runResult = driver.GetRunResult();
 
         var exception = runResult.Results.Select(m => m.Exception).FirstOrDefault();
@@ -256,10 +265,15 @@ public class AutoServiceClass3
 
     private static Compilation CreateCompilation(IEnumerable<string> sources)
     {
-        var options = new CSharpCompilationOptions(OutputKind.ConsoleApplication);
-        var reference = MetadataReference.CreateFromFile(typeof(PropertyAttribute).Assembly.Location);
+        var options = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary);
+
+        var assemblies = ReferenceAssemblies.NetStandard.NetStandard20.ResolveAsync(null, CancellationToken.None)
+            .Result.ToList();
+        assemblies.Add(MetadataReference.CreateFromFile(typeof(IServiceCollection).Assembly.Location));
+        assemblies.Add(MetadataReference.CreateFromFile(typeof(PropertyAttribute).Assembly.Location));
+
         var syntaxTrees = sources.Select(m => CSharpSyntaxTree.ParseText(m));
-        var compilation = CSharpCompilation.Create("compilation", syntaxTrees, new[] { reference },
+        var compilation = CSharpCompilation.Create("compilation", syntaxTrees, assemblies,
             options
         );
 
