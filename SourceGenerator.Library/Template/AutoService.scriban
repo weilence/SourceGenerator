@@ -8,13 +8,14 @@ namespace Microsoft.Extensions.DependencyInjection
         {
 {{~
 for class in Model.ClassList
-    if class.Type ~}}
-            services.AddSingleton<{{ class.Type }}, {{ class.Class }}>();
-    {{~ else ~}}
-            services.AddSingleton<{{ class.Class }}>();
+    if class.Types | array.size > 0
+        for type in class.Types ~}}
+            services.AddSingleton<{{ type }}, {{ class.Class }}>();
     {{~ end
-end
-~}}
+    else ~}}
+            services.AddSingleton<{{ class.Class }}>();
+{{~ end
+end ~}}
             return services;
         }
     }

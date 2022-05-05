@@ -45,6 +45,7 @@ namespace SourceGenerator.Library
                 var modelItem = new AutoServiceModelItem()
                 {
                     Class = namespaceName + "." + className,
+                    Types = new List<string>()
                 };
 
                 var argumentListArguments = attributeSyntax.ArgumentList?.Arguments;
@@ -52,14 +53,27 @@ namespace SourceGenerator.Library
                 {
                     foreach (var argumentSyntax in argumentListArguments)
                     {
-                        if (SyntaxUtils.GetName(argumentSyntax.NameEquals) == nameof(ServiceAttribute.Type))
+                        if (SyntaxUtils.GetName(argumentSyntax.NameEquals) == nameof(ServiceAttribute.Type) &&
+                            argumentSyntax.Expression is TypeOfExpressionSyntax typeOfExpressionSyntax)
                         {
-                            if (argumentSyntax.Expression is TypeOfExpressionSyntax typeOfExpressionSyntax)
+                            var type = semanticModel.GetTypeInfo(typeOfExpressionSyntax.Type).Type;
+
+                            if (type != null)
                             {
-                                var typeSyntax = typeOfExpressionSyntax.Type;
-                                var typeInfo = semanticModel.GetTypeInfo(typeSyntax);
-                                modelItem.Type = typeInfo.Type.ToString();
+                                modelItem.Types.Add(type.ToString());
                             }
+                        }
+                    }
+                }
+
+                if (modelItem.Types.Count == 0 && classDeclarationSyntax.BaseList != null)
+                {
+                    foreach (var baseTypeSyntax in classDeclarationSyntax.BaseList.Types)
+                    {
+                        var type = semanticModel.GetTypeInfo(baseTypeSyntax.Type).Type;
+                        if (type != null)
+                        {
+                            modelItem.Types.Add(type.ToString());
                         }
                     }
                 }

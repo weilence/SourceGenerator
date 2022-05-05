@@ -11,6 +11,6 @@ namespace SourceGenerator.Library.Template
     {
         public string Class { get; set; }
 
-        public string Type { get; set; }
+        public List<string> Types { get; set; }
     }
 }

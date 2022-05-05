@@ -219,8 +219,8 @@ public interface IAutoServiceClass
 {
 }
 
-[Service(Type = typeof(IAutoServiceClass))]
-public class AutoServiceClass3
+[Service]
+public class AutoServiceClass3 : IAutoServiceClass
 {
     
 }"
@@ -245,11 +245,16 @@ public class AutoServiceClass3
                 })
             )
             .RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
+        
+        foreach (var diagnostic in outputCompilation.GetDiagnostics())
+        {
+            throw new Exception(diagnostic.ToString());
+        }
 
         var outDiagnostics = outputCompilation.GetDiagnostics();
         foreach (var diagnostic in outDiagnostics)
         {
-            
+            throw new Exception(diagnostic.ToString());
         }
         
         var runResult = driver.GetRunResult();
