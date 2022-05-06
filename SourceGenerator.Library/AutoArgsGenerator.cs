@@ -80,6 +80,12 @@ namespace SourceGenerator.Library
                         continue;
                     }
 
+                    if (SyntaxUtils.HasAttribute(fieldDeclaration,
+                            name => new[] { IgnoreAttribute.Name, nameof(IgnoreAttribute) }.Contains(name)))
+                    {
+                        continue;
+                    }
+
                     var type = fieldDeclaration.Declaration.Type.ToString();
                     var typeInfo = semanticModel.GetTypeInfo(fieldDeclaration.Declaration.Type);
                     if (typeInfo.Type?.ContainingNamespace.Name == "System")
@@ -106,6 +112,35 @@ namespace SourceGenerator.Library
                     }
                 }
 
+                var constructorDeclarationSyntax =
+                    classDeclarationSyntax.Members.OfType<ConstructorDeclarationSyntax>().FirstOrDefault(m =>
+                        SyntaxUtils.HasModifier(
+                            m, SyntaxKind.PrivateKeyword));
+                if (constructorDeclarationSyntax != null)
+                {
+                    foreach (var parameterSyntax in constructorDeclarationSyntax.ParameterList.Parameters)
+                    {
+                        var name = SyntaxUtils.GetName(parameterSyntax);
+                        var type = parameterSyntax.Type.ToString();
+
+                        var field = fields.FirstOrDefault(m => m.Type == type);
+                        if (field != null)
+                        {
+                            field.InBase = true;
+                        }
+                        else
+                        {
+                            fields.Add(new Field()
+                            {
+                                Name = name,
+                                Type = type,
+                                Ignore = true,
+                                InBase = true,
+                            });
+                        }
+                    }
+                }
+
                 if (fields.Count == 0)
                 {
                     continue;
@@ -124,6 +159,7 @@ namespace SourceGenerator.Library
                     Class = SyntaxUtils.GetName(classDeclarationSyntax),
                     Fields = fields,
                     Init = classAttributeValue.GetValueOrDefault(nameof(ArgsAttribute.Init)),
+                    HasBase = fields.Any(m => m.InBase),
                 };
 
                 context.AddSource($"{model.Class}.g.cs", RenderUtils.Render("AutoArgs", model));

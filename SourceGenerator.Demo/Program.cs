@@ -9,7 +9,6 @@ class Program
         var autoPropertyClass = new AutoPropertyClass();
         Console.WriteLine(autoPropertyClass.Test);
         Console.WriteLine(autoPropertyClass.Test2);
-        var autoArgsClass = new AutoArgsClass(autoPropertyClass);
         var services = new ServiceCollection();
         services.AddOptions<AppSettings>().BindConfiguration("");
         services.AddAutoServices();

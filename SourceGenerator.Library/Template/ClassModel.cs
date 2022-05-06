@@ -18,5 +18,7 @@ namespace SourceGenerator.Library.Template
 
         public string Name { get; set; }
         public bool IsOptions { get; set; }
+        public bool InBase { get; set; }
+        public bool Ignore { get; set; }
     }
 }

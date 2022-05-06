@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using SourceGenerator.Common;
 using SourceGenerator.Library;
 
@@ -97,6 +98,7 @@ namespace compilation
     {
         var source1 = @"
 using SourceGenerator.Common;
+using System.Collections.Generic;
 
 namespace SourceGenerator.Demo
 {
@@ -107,10 +109,10 @@ namespace SourceGenerator.Demo
 
         private readonly UserClass2 _test2, _test3;
 
-        private const string test4;
+        private const string test4 = ""test4"";
     }
 
-    [Service(Init = ""Init""]
+    [Service]
     public partial class UserClass2
     {
         private readonly UserClass _test;
@@ -120,7 +122,7 @@ namespace SourceGenerator.Demo
         [Value]
         private readonly UserClass _test31;
 
-        private const string test4;
+        private const string test4 = ""test4"";
 
         private string test5;
 
@@ -128,16 +130,22 @@ namespace SourceGenerator.Demo
 
         public string test6;
 
-        public UserClass _test7;
+        [Ignore]
+        private readonly UserClass3 _test7;
 
-        public void Init()
+        private UserClass2(UserClass3 test7)
         {
-            test5 = ""test5"";
+            this._test7 = test7;
         }
+    }
+
+    public class UserClass3
+    {
     }
 }";
         var expected = @"// Auto-generated code
 using SourceGenerator.Common;
+using System.Collections.Generic;
 
 namespace SourceGenerator.Demo
 {
@@ -153,19 +161,19 @@ namespace SourceGenerator.Demo
 }";
         var expected2 = @"// Auto-generated code
 using SourceGenerator.Common;
+using System.Collections.Generic;
 using Microsoft.Extensions.Options;
 
 namespace SourceGenerator.Demo
 {
     public partial class UserClass2
     {
-        public UserClass2(UserClass a0, UserClass a1, UserClass a2, IOptions<UserClass> a3)
+        public UserClass2(UserClass a0, UserClass a1, UserClass a2, IOptions<UserClass> a3, UserClass3 a4) : this(a4)
         {
             this._test = a0;
             this._test2 = a1;
             this._test3 = a2;
             this._test31 = a3.Value;
-            this.Init();
         }
     }
 }";
@@ -245,18 +253,7 @@ public class AutoServiceClass3 : IAutoServiceClass
                 })
             )
             .RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation, out var diagnostics);
-        
-        foreach (var diagnostic in outputCompilation.GetDiagnostics())
-        {
-            throw new Exception(diagnostic.ToString());
-        }
 
-        var outDiagnostics = outputCompilation.GetDiagnostics();
-        foreach (var diagnostic in outDiagnostics)
-        {
-            throw new Exception(diagnostic.ToString());
-        }
-        
         var runResult = driver.GetRunResult();
 
         var exception = runResult.Results.Select(m => m.Exception).FirstOrDefault();
@@ -265,7 +262,26 @@ public class AutoServiceClass3 : IAutoServiceClass
             throw new Exception(exception.Message, exception);
         }
 
-        return runResult.GeneratedTrees.Select(m => m.GetText().ToString()).ToList();
+        var codes = runResult.GeneratedTrees.Select(m => m.GetText().ToString()).ToList();
+
+        foreach (var diagnostic in outputCompilation.GetDiagnostics())
+        {
+            if (diagnostic.Severity == DiagnosticSeverity.Error)
+            {
+                throw new Exception(diagnostic.ToString());
+            }
+        }
+
+        var outDiagnostics = outputCompilation.GetDiagnostics();
+        foreach (var diagnostic in outDiagnostics)
+        {
+            if (diagnostic.Severity == DiagnosticSeverity.Error)
+            {
+                throw new Exception(diagnostic.ToString());
+            }
+        }
+
+        return codes;
     }
 
     private static Compilation CreateCompilation(IEnumerable<string> sources)
@@ -276,6 +292,7 @@ public class AutoServiceClass3 : IAutoServiceClass
             .Result.ToList();
         assemblies.Add(MetadataReference.CreateFromFile(typeof(IServiceCollection).Assembly.Location));
         assemblies.Add(MetadataReference.CreateFromFile(typeof(PropertyAttribute).Assembly.Location));
+        assemblies.Add(MetadataReference.CreateFromFile(typeof(IOptions<>).Assembly.Location));
 
         var syntaxTrees = sources.Select(m => CSharpSyntaxTree.ParseText(m));
         var compilation = CSharpCompilation.Create("compilation", syntaxTrees, assemblies,

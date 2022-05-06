@@ -33,6 +33,8 @@ namespace SourceGenerator.Library
                     return variableDeclaratorSyntax.Identifier.Text;
                 case NameEqualsSyntax nameEqualsSyntax:
                     return nameEqualsSyntax.Name.Identifier.Text;
+                case ParameterSyntax parameterSyntax:
+                    return parameterSyntax.Identifier.Text;
                 default:
                     throw new NotImplementedException();
             }

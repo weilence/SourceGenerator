@@ -21,11 +21,22 @@ namespace {{ Model.Namespace }}
         public {{ Model.Class }}(
 {{- for field in Model.Fields ~}}
     {{~ GetType(field) }} a{{ for.index ~}} {{~ if !for.last }}, {{ end ~}} 
-{{~ end -}}      
+{{~ end -}}
 )
+{{- if Model.HasBase ~}}
+ : this(
+    {{- for field in Model.Fields -}}
+        {{- if field.InBase -}}
+            a{{ for.index ~}} {{~ if !for.last }}, {{ end ~}}
+        {{- end -}} 
+    {{- end -}}
+)
+{{- end }}
         {
 {{~ for field in Model.Fields ~}}
+        {{~ if !field.Ignore ~}}
             this.{{ field.Name }} = a{{ for.index }}{{ if field.IsOptions }}.Value;{{ else }};{{ end }}
+        {{~ end ~}} 
 {{~ end
     if Model.Init ~}}
             this.Init();

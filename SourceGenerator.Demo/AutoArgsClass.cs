@@ -6,6 +6,12 @@ namespace SourceGenerator.Demo;
 public partial class AutoArgsClass : IAutoArgsClass
 {
     private readonly AutoPropertyClass _autoPropertyClass;
+    private readonly AutoServiceClass _autoServiceClass;
+
+    private AutoArgsClass(AutoServiceClass autoServiceClass)
+    {
+        _autoServiceClass = autoServiceClass;
+    }
 }
 
 public interface IAutoArgsClass
