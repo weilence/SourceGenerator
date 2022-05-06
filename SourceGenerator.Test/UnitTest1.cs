@@ -32,7 +32,7 @@ namespace SourceGenerator.Demo
         [Property]
         private string _test2, _test3;
 
-        private const string test4;
+        private const string test4 = ""test4"";
     }
 }";
         var expected = @"// Auto-generated code
