@@ -6,7 +6,5 @@ namespace SourceGenerator.Common
     public class ArgsAttribute : Attribute
     {
         public const string Name = "Args";
-
-        public string Init { get; set; }
     }
 }

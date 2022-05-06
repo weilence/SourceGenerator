@@ -37,9 +37,6 @@ namespace {{ Model.Namespace }}
         {{~ if !field.Ignore ~}}
             this.{{ field.Name }} = a{{ for.index }}{{ if field.IsOptions }}.Value;{{ else }};{{ end }}
         {{~ end ~}} 
-{{~ end
-    if Model.Init ~}}
-            this.Init();
 {{~ end ~}}
         }
     }

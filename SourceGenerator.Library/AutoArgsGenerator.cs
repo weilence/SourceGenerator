@@ -158,7 +158,6 @@ namespace SourceGenerator.Library
                     Namespace = SyntaxUtils.GetName(namespaceDeclarationSyntax),
                     Class = SyntaxUtils.GetName(classDeclarationSyntax),
                     Fields = fields,
-                    Init = classAttributeValue.GetValueOrDefault(nameof(ArgsAttribute.Init)),
                     HasBase = fields.Any(m => m.InBase),
                 };
 
