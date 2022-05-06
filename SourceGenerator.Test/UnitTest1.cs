@@ -126,7 +126,7 @@ namespace SourceGenerator.Demo
 
         private string test5;
 
-        private Dictionary<string, string> dic;
+        private readonly Dictionary<string, string> dic;
 
         public string test6;
 

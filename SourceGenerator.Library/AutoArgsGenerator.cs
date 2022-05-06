@@ -88,7 +88,8 @@ namespace SourceGenerator.Library
 
                     var type = fieldDeclaration.Declaration.Type.ToString();
                     var typeInfo = semanticModel.GetTypeInfo(fieldDeclaration.Declaration.Type);
-                    if (typeInfo.Type?.ContainingNamespace.Name == "System")
+                    var @namespace = typeInfo.Type?.ContainingNamespace.ToString();
+                    if (@namespace == "System" || @namespace == "System.Collections.Generic")
                     {
                         continue;
                     }
@@ -116,6 +117,7 @@ namespace SourceGenerator.Library
                     classDeclarationSyntax.Members.OfType<ConstructorDeclarationSyntax>().FirstOrDefault(m =>
                         SyntaxUtils.HasModifier(
                             m, SyntaxKind.PrivateKeyword));
+
                 if (constructorDeclarationSyntax != null)
                 {
                     foreach (var parameterSyntax in constructorDeclarationSyntax.ParameterList.Parameters)
@@ -158,7 +160,7 @@ namespace SourceGenerator.Library
                     Namespace = SyntaxUtils.GetName(namespaceDeclarationSyntax),
                     Class = SyntaxUtils.GetName(classDeclarationSyntax),
                     Fields = fields,
-                    HasBase = fields.Any(m => m.InBase),
+                    HasBase = constructorDeclarationSyntax != null,
                 };
 
                 context.AddSource($"{model.Class}.g.cs", RenderUtils.Render("AutoArgs", model));
