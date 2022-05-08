@@ -102,14 +102,8 @@ using System.Collections.Generic;
 
 namespace SourceGenerator.Demo
 {
-    [Service]
-    public partial class UserClass
+    public class UserClass
     {
-        private readonly UserClass2 _test;
-
-        private readonly UserClass2 _test2, _test3;
-
-        private const string test4 = ""test4"";
     }
 
     [Service]
@@ -143,23 +137,8 @@ namespace SourceGenerator.Demo
     {
     }
 }";
-        var expected = @"// Auto-generated code
-using SourceGenerator.Common;
-using System.Collections.Generic;
 
-namespace SourceGenerator.Demo
-{
-    public partial class UserClass
-    {
-        public UserClass(UserClass2 a0, UserClass2 a1, UserClass2 a2)
-        {
-            this._test = a0;
-            this._test2 = a1;
-            this._test3 = a2;
-        }
-    }
-}";
-        var expected2 = @"// Auto-generated code
+        var expected = @"// Auto-generated code
 using SourceGenerator.Common;
 using System.Collections.Generic;
 using Microsoft.Extensions.Options;
@@ -181,7 +160,6 @@ namespace SourceGenerator.Demo
         var actual = Run<AutoArgsGenerator>(source1);
 
         Assert.Equal(expected, actual[0]);
-        Assert.Equal(expected2, actual[1]);
     }
 
     [Fact]

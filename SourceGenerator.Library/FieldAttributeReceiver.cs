@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -14,7 +16,10 @@ namespace SourceGenerator.Library
             this.Names = names;
         }
 
-        public HashSet<ClassDeclarationSyntax> AttributeSyntaxList { get; } = new HashSet<ClassDeclarationSyntax>();
+        private ConcurrentDictionary<ClassDeclarationSyntax, object> AttributeSyntaxDict { get; } =
+            new ConcurrentDictionary<ClassDeclarationSyntax, object>();
+
+        public ICollection<ClassDeclarationSyntax> AttributeSyntaxList => AttributeSyntaxDict.Keys;
 
         public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
         {
@@ -23,7 +28,7 @@ namespace SourceGenerator.Library
             {
                 var syntax = cds.FirstAncestorOrSelf<ClassDeclarationSyntax>();
                 if (syntax == null) return;
-                AttributeSyntaxList.Add(syntax);
+                AttributeSyntaxDict[syntax] = null;
             }
         }
     }
