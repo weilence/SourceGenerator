@@ -163,7 +163,7 @@ namespace SourceGenerator.Library
                     HasBase = constructorDeclarationSyntax != null,
                 };
 
-                context.AddSource($"{model.Class}.g.cs", RenderUtils.Render("AutoArgs", model));
+                context.AddSource($"{model.Namespace}.{model.Class}.g.cs", RenderUtils.Render("AutoArgs", model));
             }
         }
     }
