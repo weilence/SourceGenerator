@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace SourceGenerator.Common
 {
@@ -8,5 +9,7 @@ namespace SourceGenerator.Common
         public const string Name = "Service";
         
         public Type Type { get; set; }
+
+        public ServiceLifetime Lifetime { get; set; }
     }
 }

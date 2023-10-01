@@ -4,7 +4,6 @@
     <IncludeAssemblies>
       Scriban
       System.Text.Json
-      SourceGenerator.Common
     </IncludeAssemblies>
   </Costura>
 </Weavers>

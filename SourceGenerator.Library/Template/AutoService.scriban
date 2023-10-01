@@ -1,22 +1,54 @@
 // Auto-generated code
+using System;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class AutoServiceExtension
     {
-        public static IServiceCollection AddAutoServices(this IServiceCollection services)
+        public static IServiceCollection AddAutoServices(this IServiceCollection services, ServiceLifetime lifetime = ServiceLifetime.Singleton)
         {
 {{~
 for class in Model.ClassList
+    implementationType = class.Class
+    lifetime = "lifetime"
+    if class.Lifetime
+        lifetime = class.Lifetime
+    end
+
+    serviceType = class.Class
     if class.Types | array.size > 0
-        for type in class.Types ~}}
-            services.AddSingleton<{{ type }}, {{ class.Class }}>();
-    {{~ end
-    else ~}}
-            services.AddSingleton<{{ class.Class }}>();
-{{~ end
-end ~}}
+        for type in class.Types
+            serviceType = type
+~}}
+            AddService(services, typeof({{ serviceType }}), typeof({{ implementationType }}), {{ lifetime }});
+{{~
+        end
+    else
+ ~}}
+            AddService(services, typeof({{ serviceType }}), typeof({{ implementationType }}), {{ lifetime }});
+{{~
+    end
+end
+~}}
             return services;
+        }
+
+        private static void AddService(IServiceCollection services, Type serviceType, Type implementationType, ServiceLifetime lifetime)
+        {
+            switch (lifetime)
+            {
+                case ServiceLifetime.Singleton:
+                    services.AddSingleton(serviceType, implementationType);
+                    break;
+                case ServiceLifetime.Scoped:
+                    services.AddScoped(serviceType, implementationType);
+                    break;
+                case ServiceLifetime.Transient:
+                    services.AddTransient(serviceType, implementationType);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+            }
         }
     }
 }

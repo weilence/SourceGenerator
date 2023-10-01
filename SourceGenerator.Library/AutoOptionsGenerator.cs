@@ -69,12 +69,16 @@ namespace SourceGenerator.Library
 
                 path = Path.Combine(projectDir, path);
 
+#pragma warning disable RS1035
                 if (!File.Exists(path))
+#pragma warning restore RS1035
                 {
                     return;
                 }
 
+#pragma warning disable RS1035
                 var appSettingsFile = File.ReadAllText(path);
+#pragma warning restore RS1035
 
                 var rootElement = JsonDocument.Parse(appSettingsFile).RootElement;
                 var classInfo = JsonUtils.ParseJson(rootElement);

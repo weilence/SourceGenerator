@@ -5,3 +5,4 @@ obj
 .vs
 pack
 publish.ps1
+.DS_Store

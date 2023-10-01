@@ -53,14 +53,32 @@ namespace SourceGenerator.Library
                 {
                     foreach (var argumentSyntax in argumentListArguments)
                     {
-                        if (SyntaxUtils.GetName(argumentSyntax.NameEquals) == nameof(ServiceAttribute.Type) &&
-                            argumentSyntax.Expression is TypeOfExpressionSyntax typeOfExpressionSyntax)
+                        var propertyName = SyntaxUtils.GetName(argumentSyntax.NameEquals);
+                        switch (propertyName)
                         {
-                            var type = semanticModel.GetTypeInfo(typeOfExpressionSyntax.Type).Type;
-
-                            if (type != null)
+                            case nameof(ServiceAttribute.Type):
                             {
-                                modelItem.Types.Add(type.ToString());
+                                if (argumentSyntax.Expression is TypeOfExpressionSyntax typeOfExpressionSyntax)
+                                {
+                                    var type = semanticModel.GetTypeInfo(typeOfExpressionSyntax.Type).Type;
+
+                                    if (type != null)
+                                    {
+                                        modelItem.Types.Add(type.ToString());
+                                    }
+                                }
+
+                                break;
+                            }
+                            case nameof(ServiceAttribute.Lifetime):
+                            {
+                                if (argumentSyntax.Expression is MemberAccessExpressionSyntax
+                                    memberAccessExpressionSyntax)
+                                {
+                                    modelItem.Lifetime = memberAccessExpressionSyntax.ToString();
+                                }
+
+                                break;
                             }
                         }
                     }

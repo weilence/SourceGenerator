@@ -12,5 +12,7 @@ namespace SourceGenerator.Library.Template
         public string Class { get; set; }
 
         public List<string> Types { get; set; }
+
+        public string Lifetime { get; set; }
     }
 }

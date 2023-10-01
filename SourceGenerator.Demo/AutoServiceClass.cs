@@ -1,9 +1,9 @@
-﻿using SourceGenerator.Common;
+﻿using Microsoft.Extensions.DependencyInjection;
+using SourceGenerator.Common;
 
 namespace SourceGenerator.Demo;
 
-[Service]
+[Service(Lifetime = ServiceLifetime.Scoped)]
 public partial class AutoServiceClass
 {
-    
 }
