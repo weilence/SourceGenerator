@@ -6,4 +6,8 @@
       <Version>3.6.133</Version>
     </PackageReference>
   </ItemGroup>
+  <PropertyGroup>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
 </Project>
