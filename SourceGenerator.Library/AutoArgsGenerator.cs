@@ -89,7 +89,7 @@ namespace SourceGenerator.Library
                     var type = fieldDeclaration.Declaration.Type.ToString();
                     var typeInfo = semanticModel.GetTypeInfo(fieldDeclaration.Declaration.Type);
                     var @namespace = typeInfo.Type?.ContainingNamespace.ToString();
-                    if (@namespace == "System" || @namespace == "System.Collections.Generic")
+                    if (@namespace == "System.Collections.Generic" || @namespace == "System.Collections.Concurrent")
                     {
                         continue;
                     }
