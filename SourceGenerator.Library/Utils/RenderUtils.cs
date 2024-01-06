@@ -4,13 +4,13 @@ using System.Reflection;
 using Scriban;
 using Scriban.Runtime;
 
-namespace SourceGenerator.Library
+namespace SourceGenerator.Library.Utils
 {
     public class RenderUtils
     {
-        private static readonly Dictionary<string, Scriban.Template> Dictionary = new Dictionary<string, Scriban.Template>();
+        private static readonly Dictionary<string, Template> Dictionary = new Dictionary<string, Template>();
 
-        private const string ClassNamespace = "SourceGenerator.Library.Template";
+        private const string ClassNamespace = "SourceGenerator.Library.Templates";
         private const string TemplateExtension = "scriban";
 
         private static string ReadFile(string resourceName)
@@ -31,7 +31,7 @@ namespace SourceGenerator.Library
             {
                 var resourceName = string.Join(".", ClassNamespace, key, TemplateExtension);
                 var text = ReadFile(resourceName);
-                template = Scriban.Template.Parse(text);
+                template = Template.Parse(text);
                 Dictionary[key] = template;
             }
 

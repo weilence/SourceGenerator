@@ -1,4 +1,4 @@
-﻿namespace SourceGenerator.Library.Template
+﻿namespace SourceGenerator.Library.Templates
 {
     public class AutoArgsModel : ClassModel
     {

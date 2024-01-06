@@ -1,4 +1,5 @@
 ﻿using SourceGenerator.Library;
+using SourceGenerator.Library.Utils;
 using Xunit;
 
 namespace SourceGenerator.Test;

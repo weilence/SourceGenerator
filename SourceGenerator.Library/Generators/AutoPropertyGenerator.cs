@@ -1,12 +1,14 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SourceGenerator.Common;
-using SourceGenerator.Library.Template;
+using SourceGenerator.Library.Receivers;
+using SourceGenerator.Library.Templates;
+using SourceGenerator.Library.Utils;
 
-namespace SourceGenerator.Library
+namespace SourceGenerator.Library.Generators
 {
     [Generator]
     public class AutoPropertyGenerator : ISourceGenerator
@@ -14,12 +16,12 @@ namespace SourceGenerator.Library
         public void Initialize(GeneratorInitializationContext context)
         {
             context.RegisterForSyntaxNotifications(() =>
-                new FieldAttributeReceiver(new List<string> { nameof(PropertyAttribute), PropertyAttribute.Name }));
+                new ClassSyntaxReceiver(new List<string> { nameof(PropertyAttribute), PropertyAttribute.Name }));
         }
 
         public void Execute(GeneratorExecutionContext context)
         {
-            var receiver = (FieldAttributeReceiver)context.SyntaxReceiver;
+            var receiver = (ClassSyntaxReceiver)context.SyntaxReceiver;
             var syntaxList = receiver.AttributeSyntaxList;
 
             if (syntaxList.Count == 0)
@@ -57,7 +59,7 @@ namespace SourceGenerator.Library
                 };
                 foreach (var fieldDeclaration in fieldDeclarationList)
                 {
-                    if (!SyntaxUtils.HasAttribute(fieldDeclaration, name => receiver.Names.Contains(name)))
+                    if (!SyntaxUtils.HasAttribute(fieldDeclaration, name => receiver.AttributeNames.Contains(name)))
                     {
                         continue;
                     }

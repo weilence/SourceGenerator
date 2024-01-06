@@ -6,10 +6,12 @@ func RenderClass
     {
         {{~ for property in class.Properties; RenderProperty property; end ~}}
     }
-
 {{~
     for property in class.Properties
         if property.Class
+~}}
+
+{{~
             RenderClass property.Class
         end
     end

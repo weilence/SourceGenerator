@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace SourceGenerator.Library
+namespace SourceGenerator.Library.Utils
 {
     public class SemanticUtils
     {

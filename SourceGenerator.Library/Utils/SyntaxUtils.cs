@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace SourceGenerator.Library
+namespace SourceGenerator.Library.Utils
 {
     public class SyntaxUtils
     {
@@ -56,6 +56,14 @@ namespace SourceGenerator.Library
             var compilationUnitSyntax = classDeclarationSyntax.SyntaxTree.GetRoot() as CompilationUnitSyntax;
             var usings = compilationUnitSyntax.Usings.Select(m => m.ToString()).ToList();
             return usings;
+        }
+
+        public static string GetNamespaceName(ClassDeclarationSyntax classDeclarationSyntax)
+        {
+            var namespaceDeclarationSyntax =
+                classDeclarationSyntax.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>();
+
+            return GetName(namespaceDeclarationSyntax);
         }
     }
 }

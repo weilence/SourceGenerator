@@ -5,9 +5,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SourceGenerator.Common;
-using SourceGenerator.Library.Template;
+using SourceGenerator.Library.Receivers;
+using SourceGenerator.Library.Templates;
+using SourceGenerator.Library.Utils;
 
-namespace SourceGenerator.Library
+namespace SourceGenerator.Library.Generators
 {
     [Generator]
     public class AutoOptionsGenerator : ISourceGenerator
@@ -17,12 +19,12 @@ namespace SourceGenerator.Library
         public void Initialize(GeneratorInitializationContext context)
         {
             context.RegisterForSyntaxNotifications(() =>
-                new FieldAttributeReceiver(new List<string> { nameof(OptionsAttribute), OptionsAttribute.Name }));
+                new ClassSyntaxReceiver(new List<string> { nameof(OptionsAttribute), OptionsAttribute.Name }));
         }
 
         public void Execute(GeneratorExecutionContext context)
         {
-            var receiver = (FieldAttributeReceiver)context.SyntaxReceiver;
+            var receiver = (ClassSyntaxReceiver)context.SyntaxReceiver;
             var syntaxList = receiver.AttributeSyntaxList;
 
             if (syntaxList.Count == 0)
@@ -58,7 +60,7 @@ namespace SourceGenerator.Library
                 }
 
                 var attributeSyntax =
-                    SyntaxUtils.GetAttribute(classDeclarationSyntax, name => receiver.Names.Contains(name));
+                    SyntaxUtils.GetAttribute(classDeclarationSyntax, name => receiver.AttributeNames.Contains(name));
                 var semanticModel = context.Compilation.GetSemanticModel(classDeclarationSyntax.SyntaxTree);
 
                 var attributeValue = SemanticUtils.GetAttributeValue(semanticModel, attributeSyntax);
@@ -87,12 +89,12 @@ namespace SourceGenerator.Library
                     classDeclarationSyntax.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>();
                 var namespaceName = SyntaxUtils.GetName(baseNamespaceDeclarationSyntax);
                 classInfo.Name = classInfoName;
-                var appSettings = new OptionsModel()
+                var appSettings = new AutoOptionsModel()
                 {
                     Namespace = namespaceName,
                     Class = classInfo,
                 };
-                context.AddSource(classInfo.Name + ".g.cs", RenderUtils.Render("Options", appSettings));
+                context.AddSource(classInfo.Name + ".g.cs", RenderUtils.Render("AutoOptions", appSettings));
             }
         }
     }

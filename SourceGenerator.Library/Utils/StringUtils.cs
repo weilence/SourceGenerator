@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SourceGenerator.Library
+namespace SourceGenerator.Library.Utils
 {
     public class StringUtils
     {

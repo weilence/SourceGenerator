@@ -4,9 +4,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SourceGenerator.Common;
-using SourceGenerator.Library.Template;
+using SourceGenerator.Library.Receivers;
+using SourceGenerator.Library.Templates;
+using SourceGenerator.Library.Utils;
 
-namespace SourceGenerator.Library
+namespace SourceGenerator.Library.Generators
 {
     [Generator]
     public class AutoArgsGenerator : ISourceGenerator
@@ -14,16 +16,18 @@ namespace SourceGenerator.Library
         public void Initialize(GeneratorInitializationContext context)
         {
             context.RegisterForSyntaxNotifications(() =>
-                new FieldAttributeReceiver(new List<string>
+                new ClassSyntaxReceiver(new List<string>
                 {
-                    nameof(ArgsAttribute), ArgsAttribute.Name, nameof(ServiceAttribute),
-                    ServiceAttribute.Name
+                    nameof(ArgsAttribute),
+                    ArgsAttribute.Name,
+                    nameof(ServiceAttribute),
+                    ServiceAttribute.Name,
                 }));
         }
 
         public void Execute(GeneratorExecutionContext context)
         {
-            var receiver = (FieldAttributeReceiver)context.SyntaxReceiver;
+            var receiver = (ClassSyntaxReceiver)context.SyntaxReceiver;
             var syntaxList = receiver.AttributeSyntaxList;
 
             if (syntaxList.Count == 0)
@@ -33,16 +37,10 @@ namespace SourceGenerator.Library
 
             foreach (var classDeclarationSyntax in syntaxList)
             {
-                if (!SyntaxUtils.HasModifier(classDeclarationSyntax, SyntaxKind.PartialKeyword))
+                if (!ReportUtils.CheckPartial(context, classDeclarationSyntax))
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.SGL001,
-                        classDeclarationSyntax.GetLocation(),
-                        SyntaxUtils.GetName(classDeclarationSyntax)));
                     continue;
                 }
-
-                var namespaceDeclarationSyntax =
-                    classDeclarationSyntax.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>();
 
                 var fieldDeclarationList = classDeclarationSyntax.Members.OfType<FieldDeclarationSyntax>().ToList();
                 if (fieldDeclarationList.Count == 0)
@@ -53,9 +51,8 @@ namespace SourceGenerator.Library
                 var semanticModel = context.Compilation.GetSemanticModel(classDeclarationSyntax.SyntaxTree);
 
                 var attributeSyntax =
-                    SyntaxUtils.GetAttribute(classDeclarationSyntax, name => receiver.Names.Contains(name));
+                    SyntaxUtils.GetAttribute(classDeclarationSyntax, name => receiver.AttributeNames.Contains(name));
 
-                var classAttributeValue = SemanticUtils.GetAttributeValue(semanticModel, attributeSyntax);
                 var hasOptions = false;
 
                 var fields = new List<Field>();
@@ -73,7 +70,7 @@ namespace SourceGenerator.Library
                     }
 
                     var fieldAttribute =
-                        SyntaxUtils.GetAttribute(fieldDeclaration, name => receiver.Names.Contains(name));
+                        SyntaxUtils.GetAttribute(fieldDeclaration, name => receiver.AttributeNames.Contains(name));
 
                     if (fieldAttribute == null && attributeSyntax == null)
                     {
@@ -81,7 +78,11 @@ namespace SourceGenerator.Library
                     }
 
                     if (SyntaxUtils.HasAttribute(fieldDeclaration,
-                            name => new[] { IgnoreAttribute.Name, nameof(IgnoreAttribute) }.Contains(name)))
+                            name => new[]
+                            {
+                                IgnoreAttribute.Name,
+                                nameof(IgnoreAttribute)
+                            }.Contains(name)))
                     {
                         continue;
                     }
@@ -157,7 +158,7 @@ namespace SourceGenerator.Library
                 var model = new AutoArgsModel()
                 {
                     Usings = usings,
-                    Namespace = SyntaxUtils.GetName(namespaceDeclarationSyntax),
+                    Namespace = SyntaxUtils.GetNamespaceName(classDeclarationSyntax),
                     Class = SyntaxUtils.GetName(classDeclarationSyntax),
                     Fields = fields,
                     HasBase = constructorDeclarationSyntax != null,

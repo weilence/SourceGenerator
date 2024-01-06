@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace SourceGenerator.Library.Template
+namespace SourceGenerator.Library.Templates
 {
-    public class OptionsModel
+    public class AutoOptionsModel
     {
         public string Namespace { get; set; }
 

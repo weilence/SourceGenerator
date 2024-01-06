@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SourceGenerator.Library.Template
+namespace SourceGenerator.Library.Templates
 {
     public class ClassModel
     {

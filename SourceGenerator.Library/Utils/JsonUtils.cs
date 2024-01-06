@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.Json;
-using SourceGenerator.Library.Template;
+using SourceGenerator.Library.Templates;
 
-namespace SourceGenerator.Library
+namespace SourceGenerator.Library.Utils
 {
     public class JsonUtils
     {

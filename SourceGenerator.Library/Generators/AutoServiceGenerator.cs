@@ -2,9 +2,11 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SourceGenerator.Common;
-using SourceGenerator.Library.Template;
+using SourceGenerator.Library.Receivers;
+using SourceGenerator.Library.Templates;
+using SourceGenerator.Library.Utils;
 
-namespace SourceGenerator.Library
+namespace SourceGenerator.Library.Generators
 {
     [Generator]
     public class AutoServiceGenerator : ISourceGenerator
@@ -12,12 +14,12 @@ namespace SourceGenerator.Library
         public void Initialize(GeneratorInitializationContext context)
         {
             context.RegisterForSyntaxNotifications(() =>
-                new ClassAttributeReceiver(new List<string> { nameof(ServiceAttribute), ServiceAttribute.Name }));
+                new ClassSyntaxReceiver(new List<string> { nameof(ServiceAttribute), ServiceAttribute.Name }));
         }
 
         public void Execute(GeneratorExecutionContext context)
         {
-            var receiver = (ClassAttributeReceiver)context.SyntaxReceiver;
+            var receiver = (ClassSyntaxReceiver)context.SyntaxReceiver;
             var syntaxList = receiver.AttributeSyntaxList;
 
             if (syntaxList.Count == 0)
@@ -29,7 +31,7 @@ namespace SourceGenerator.Library
             foreach (var classDeclarationSyntax in syntaxList)
             {
                 var attributeSyntax =
-                    SyntaxUtils.GetAttribute(classDeclarationSyntax, name => receiver.Names.Contains(name));
+                    SyntaxUtils.GetAttribute(classDeclarationSyntax, name => receiver.AttributeNames.Contains(name));
                 if (attributeSyntax == null)
                 {
                     continue;

@@ -1,17 +1,16 @@
 ﻿using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace SourceGenerator.Library
+namespace SourceGenerator.Library.Receivers
 {
-    public class ClassAttributeReceiver : ISyntaxReceiver
+    public class ClassSyntaxReceiver : ISyntaxReceiver
     {
-        public readonly List<string> Names;
+        public readonly List<string> AttributeNames;
 
-        public ClassAttributeReceiver(List<string> names)
+        public ClassSyntaxReceiver(List<string> attributeNames)
         {
-            this.Names = names;
+            AttributeNames = attributeNames;
         }
 
         public HashSet<ClassDeclarationSyntax> AttributeSyntaxList { get; } = new HashSet<ClassDeclarationSyntax>();
@@ -19,7 +18,7 @@ namespace SourceGenerator.Library
         public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
         {
             if (syntaxNode is AttributeSyntax cds && cds.Name is IdentifierNameSyntax identifierName &&
-                Names.Contains(identifierName.Identifier.ValueText))
+                AttributeNames.Contains(identifierName.Identifier.ValueText))
             {
                 var syntax = cds.FirstAncestorOrSelf<ClassDeclarationSyntax>();
                 if (syntax == null) return;
