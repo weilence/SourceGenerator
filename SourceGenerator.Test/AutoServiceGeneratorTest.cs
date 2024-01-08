@@ -8,6 +8,38 @@ public class AutoServiceGeneratorTest : BaseTest
     [Fact]
     public void Test()
     {
+        var source = new[]
+        {
+            @"using SourceGenerator.Common;
+
+namespace SourceGenerator.Demo;
+
+[Service]
+public class AutoServiceClass
+{
+    
+}",
+            @"using SourceGenerator.Common;
+
+namespace SourceGenerator.Demo2;
+
+[Service]
+public class AutoServiceClass2
+{
+    
+}
+
+public interface IAutoServiceClass
+{
+}
+
+[Service]
+public class AutoServiceClass3 : IAutoServiceClass
+{
+    
+}",
+        };
+
         var expected = @"// Auto-generated code
 using System;
 
@@ -41,38 +73,8 @@ namespace Microsoft.Extensions.DependencyInjection
             }
         }
     }
-}";
-        var source = new[]
-        {
-            @"using SourceGenerator.Common;
-
-namespace SourceGenerator.Demo;
-
-[Service]
-public class AutoServiceClass
-{
-    
-}",
-            @"using SourceGenerator.Common;
-
-namespace SourceGenerator.Demo2;
-
-[Service]
-public class AutoServiceClass2
-{
-    
 }
-
-public interface IAutoServiceClass
-{
-}
-
-[Service]
-public class AutoServiceClass3 : IAutoServiceClass
-{
-    
-}"
-        };
+".ReplaceLineEndings();
         var actual = Run<AutoServiceGenerator>(source);
 
         Assert.Equal(expected, actual[0]);

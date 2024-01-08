@@ -1,3 +1,4 @@
+<#@ template language="C#" #>
 // Auto-generated code
 using System;
 
@@ -7,29 +8,31 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddAutoServices(this IServiceCollection services, ServiceLifetime lifetime = ServiceLifetime.Singleton)
         {
-{{~
-for class in Model.ClassList
-    implementationType = class.Class
-    lifetime = "lifetime"
-    if class.Lifetime
-        lifetime = class.Lifetime
-    end
-
-    serviceType = class.Class
-    if class.Types | array.size > 0
-        for type in class.Types
-            serviceType = type
-~}}
-            AddService(services, typeof({{ serviceType }}), typeof({{ implementationType }}), {{ lifetime }});
-{{~
-        end
-    else
- ~}}
-            AddService(services, typeof({{ serviceType }}), typeof({{ implementationType }}), {{ lifetime }});
-{{~
-    end
-end
-~}}
+<#
+    foreach (var @class in ClassList)
+    {
+        var lifetime = "lifetime";
+        if (@class.Lifetime == "")
+        {
+            lifetime = @class.Lifetime;
+        }
+        if (@class.Types.Count > 0)
+        {
+            foreach (var type in @class.Types)
+            {
+#>
+            AddService(services, typeof(<#= type #>), typeof(<#= @class.Class #>), <#= lifetime #>);
+<#
+            }
+        }
+        else
+        {
+#>
+            AddService(services, typeof(<#= @class.Class #>), typeof(<#= @class.Class #>), <#= lifetime #>);
+<#
+        }
+    }
+#>
             return services;
         }
 

@@ -19,7 +19,10 @@ namespace SourceGenerator.Library.Generators
         public void Initialize(GeneratorInitializationContext context)
         {
             context.RegisterForSyntaxNotifications(() =>
-                new ClassSyntaxReceiver(new List<string> { nameof(OptionsAttribute), OptionsAttribute.Name }));
+                new ClassSyntaxReceiver(new List<string>
+                {
+                    nameof(OptionsAttribute), OptionsAttribute.Name
+                }));
         }
 
         public void Execute(GeneratorExecutionContext context)
@@ -89,12 +92,12 @@ namespace SourceGenerator.Library.Generators
                     classDeclarationSyntax.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>();
                 var namespaceName = SyntaxUtils.GetName(baseNamespaceDeclarationSyntax);
                 classInfo.Name = classInfoName;
-                var appSettings = new AutoOptionsModel()
+                var model = new AutoOptionsModel()
                 {
-                    Namespace = namespaceName,
-                    Class = classInfo,
+                    Namespace = namespaceName, Class = classInfo,
                 };
-                context.AddSource(classInfo.Name + ".g.cs", RenderUtils.Render("AutoOptions", appSettings));
+
+                context.AddSource(classInfo.Name + ".g.cs", new AutoOptions(model).TransformText());
             }
         }
     }

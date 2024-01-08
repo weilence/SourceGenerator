@@ -14,7 +14,10 @@ namespace SourceGenerator.Library.Generators
         public void Initialize(GeneratorInitializationContext context)
         {
             context.RegisterForSyntaxNotifications(() =>
-                new ClassSyntaxReceiver(new List<string> { nameof(ServiceAttribute), ServiceAttribute.Name }));
+                new ClassSyntaxReceiver(new List<string>
+                {
+                    nameof(ServiceAttribute), ServiceAttribute.Name
+                }));
         }
 
         public void Execute(GeneratorExecutionContext context)
@@ -27,7 +30,7 @@ namespace SourceGenerator.Library.Generators
                 return;
             }
 
-            var classList = new List<AutoServiceModelItem>();
+            var classList = new List<AutoServiceItem>();
             foreach (var classDeclarationSyntax in syntaxList)
             {
                 var attributeSyntax =
@@ -44,10 +47,9 @@ namespace SourceGenerator.Library.Generators
 
                 var semanticModel = context.Compilation.GetSemanticModel(classDeclarationSyntax.SyntaxTree);
 
-                var modelItem = new AutoServiceModelItem()
+                var modelItem = new AutoServiceItem()
                 {
-                    Class = namespaceName + "." + className,
-                    Types = new List<string>()
+                    Class = namespaceName + "." + className, Types = new List<string>()
                 };
 
                 var argumentListArguments = attributeSyntax.ArgumentList?.Arguments;
@@ -106,12 +108,7 @@ namespace SourceGenerator.Library.Generators
                 return;
             }
 
-            var model = new AutoServiceModel()
-            {
-                ClassList = classList
-            };
-
-            context.AddSource($"AutoServiceExtension.Class.g.cs", RenderUtils.Render("AutoService", model));
+            context.AddSource($"AutoServiceExtension.Class.g.cs", new AutoService(classList).TransformText());
         }
     }
 }

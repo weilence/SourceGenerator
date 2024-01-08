@@ -1,0 +1,103 @@
+<#@ template language="C#" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+// Auto-generated code
+<#
+    foreach (var @using in Model.Usings)
+    {
+        WriteLine(@using);
+    }
+#>
+
+namespace <#= Model.Namespace #>
+{
+    public partial class <#= Model.Class #>
+    {
+        public <#= Model.Class #>(<#= WriteParameters(Model.Fields) #>)<#= WriteInitializer(Model) #>
+        {
+<#
+    for (var i = 0; i < Model.Fields.Count; i++)
+    {
+        var field = Model.Fields[i];
+        if (field.Ignore)
+        {
+            continue;
+        }
+
+        if (field.IsOptions)
+        {
+#>
+            this.<#= field.Name #> = a<#= i #>.Value;
+<#
+        }
+        else
+        {
+#>
+            this.<#= field.Name #> = a<#= i #>;
+<#
+        }
+    }
+#>
+        }
+    }
+}
+<#+
+    string WriteParameters(IList<Field> fields)
+    {
+        var sb = new StringBuilder();
+        for (var i = 0; i < fields.Count; i++)
+        {
+            var field = fields[i];
+            sb.Append(field.IsOptions ? $"IOptions<{field.Type}>" : field.Type);
+            sb.Append(" a");
+            sb.Append(i);
+
+            if (i < fields.Count - 1)
+            {
+                sb.Append(", ");
+            }
+        }
+        return sb.ToString();
+    }
+
+    string WriteArguments(ICollection<Field> fields)
+    {
+        var sb = new StringBuilder();
+        for (var i = 0; i < fields.Count; i++)
+        {
+            sb.Append("a");
+            sb.Append(i);
+
+            if (i < fields.Count - 1)
+            {
+                sb.Append(", ");
+            }
+        }
+        return sb.ToString();
+    }
+
+    string WriteInitializer(AutoArgsModel model)
+    {
+        if (!model.HasBase)
+        {
+            return "";
+        }
+
+        var sb = new StringBuilder();
+        sb.Append(" : this(");
+        for (var i = 0; i < model.Fields.Count; i++)
+        {
+            var field = model.Fields[i];
+            if (!field.InBase) continue;
+            sb.Append("a");
+            sb.Append(i);
+            if (i < model.Fields.Count - 1)
+            {
+                sb.Append(", ");
+            }
+        }
+        sb.Append(")");
+
+        return sb.ToString();
+    }
+#>

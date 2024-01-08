@@ -20,7 +20,6 @@ namespace compilation
 }";
 
         var expected = @"// Auto-generated code
-
 namespace compilation
 {
     public partial class AppSettings
@@ -38,7 +37,7 @@ namespace compilation
         public string Test41 { get; set; }
     }
 }
-";
+".ReplaceLineEndings();
 
         var actual = Run<AutoOptionsGenerator>(source);
 

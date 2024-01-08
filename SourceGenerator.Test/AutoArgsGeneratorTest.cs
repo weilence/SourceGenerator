@@ -69,7 +69,7 @@ namespace SourceGenerator.Demo
         }
     }
 }
-";
+".ReplaceLineEndings();
 
         var actual = Run<AutoArgsGenerator>(source1).FirstOrDefault();
 

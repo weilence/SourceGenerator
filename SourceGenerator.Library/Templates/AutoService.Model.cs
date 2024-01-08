@@ -2,12 +2,17 @@
 
 namespace SourceGenerator.Library.Templates
 {
-    public class AutoServiceModel
+    partial class AutoService
     {
-        public List<AutoServiceModelItem> ClassList { get; set; }
+        private readonly List<AutoServiceItem> ClassList;
+
+        public AutoService(List<AutoServiceItem> classList)
+        {
+            ClassList = classList;
+        }
     }
 
-    public class AutoServiceModelItem
+    public class AutoServiceItem
     {
         public string Class { get; set; }
 

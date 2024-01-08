@@ -2,6 +2,16 @@
 
 namespace SourceGenerator.Library.Templates
 {
+    partial class AutoOptions
+    {
+        private readonly AutoOptionsModel Model;
+
+        public AutoOptions(AutoOptionsModel Model)
+        {
+            this.Model = Model;
+        }
+    }
+
     public class AutoOptionsModel
     {
         public string Namespace { get; set; }
@@ -12,7 +22,7 @@ namespace SourceGenerator.Library.Templates
     public class ClassInfo
     {
         public string Name { get; set; }
-        
+
         public List<PropertyInfo> Properties { get; set; }
     }
 
@@ -23,7 +33,7 @@ namespace SourceGenerator.Library.Templates
         public string Type { get; set; }
 
         public string Value { get; set; }
-        
+
         public ClassInfo Class { get; set; }
     }
 }

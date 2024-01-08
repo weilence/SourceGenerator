@@ -77,7 +77,7 @@ namespace SourceGenerator.Library.Generators
                     }
                 }
 
-                context.AddSource($"{model.Class}.g.cs", RenderUtils.Render("AutoProperty", model));
+                context.AddSource($"{model.Class}.g.cs", new AutoProperty(model).TransformText());
             }
         }
     }

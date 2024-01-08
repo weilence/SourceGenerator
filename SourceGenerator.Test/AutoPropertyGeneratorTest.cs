@@ -35,7 +35,8 @@ namespace SourceGenerator.Demo
         public string Test2 { get => _test2; set => _test2 = value; }
         public string Test3 { get => _test3; set => _test3 = value; }
     }
-}";
+}
+".ReplaceLineEndings();
 
         var actual = Run<AutoPropertyGenerator>(source);
 

@@ -1,28 +1,73 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
-		<IncludeBuildOutput>false</IncludeBuildOutput>
-		<PackageProjectUrl>https://github.com/Weilence/SourceGenerator</PackageProjectUrl>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<RepositoryUrl>https://github.com/Weilence/SourceGenerator</RepositoryUrl>
-		<Authors>Weilence</Authors>
-		<Description>Generator repeate code, powered by source generator.</Description>
-		<PackageTags>source generator</PackageTags>
-		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-	</PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <IncludeBuildOutput>false</IncludeBuildOutput>
+        <PackageProjectUrl>https://github.com/Weilence/SourceGenerator</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/Weilence/SourceGenerator</RepositoryUrl>
+        <Authors>Weilence</Authors>
+        <Description>Generator repeate code, powered by source generator.</Description>
+        <PackageTags>source generator</PackageTags>
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+        <NoWarn>$(NoWarn);RS1035;NU5128</NoWarn>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\SourceGenerator.Common\SourceGenerator.Common.csproj" />
-		<PackageReference Include="Costura.Fody" Version="5.7.0" PrivateAssets="all" />
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.6.0" PrivateAssets="all" />
-		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" />
+    <ItemGroup>
+        <ProjectReference Include="..\SourceGenerator.Common\SourceGenerator.Common.csproj"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.6.0" PrivateAssets="all"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all"/>
+        <PackageReference Include="System.CodeDom" Version="8.0.0" PrivateAssets="all"/>
+        <PackageReference Include="System.Text.Json" Version="7.0.3" PrivateAssets="all"/>
 
-		<PackageReference Include="Scriban" Version="5.9.0" PrivateAssets="all" />
-		<PackageReference Include="System.Text.Json" Version="7.0.3" PrivateAssets="all" />
+        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
 
-		<EmbeddedResource Include="Templates\*.scriban" />
-		<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-	</ItemGroup>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Update="Templates\AutoProperty.cs">
+            <AutoGen>True</AutoGen>
+            <DesignTime>True</DesignTime>
+            <DependentUpon>AutoProperty.tt</DependentUpon>
+        </Compile>
+        <Compile Update="Templates\AutoOptions.cs">
+            <AutoGen>True</AutoGen>
+            <DesignTime>True</DesignTime>
+            <DependentUpon>AutoOptions.tt</DependentUpon>
+        </Compile>
+        <Compile Update="Templates\AutoArgs.cs">
+            <AutoGen>True</AutoGen>
+            <DesignTime>True</DesignTime>
+            <DependentUpon>AutoArgs.tt</DependentUpon>
+        </Compile>
+        <Compile Update="Templates\AutoService.cs">
+            <AutoGen>True</AutoGen>
+            <DesignTime>True</DesignTime>
+            <DependentUpon>AutoService.tt</DependentUpon>
+        </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="Templates\AutoProperty.tt">
+            <Generator>TextTemplatingFilePreprocessor</Generator>
+            <LastGenOutput>AutoProperty.cs</LastGenOutput>
+        </None>
+        <None Update="Templates\AutoOptions.tt">
+            <Generator>TextTemplatingFilePreprocessor</Generator>
+            <LastGenOutput>AutoOptions.cs</LastGenOutput>
+        </None>
+        <None Update="Templates\AutoArgs.tt">
+            <Generator>TextTemplatingFilePreprocessor</Generator>
+            <LastGenOutput>AutoArgs.cs</LastGenOutput>
+        </None>
+        <None Update="Templates\AutoService.tt">
+            <Generator>TextTemplatingFilePreprocessor</Generator>
+            <LastGenOutput>AutoService.cs</LastGenOutput>
+        </None>
+    </ItemGroup>
 
 </Project>

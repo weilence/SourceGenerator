@@ -44,7 +44,14 @@ public abstract class BaseTest
         {
             if (diagnostic.Severity == DiagnosticSeverity.Error)
             {
-                throw new Exception(diagnostic.GetMessage());
+                if (codes.Count > 0)
+                {
+                    throw new Exception(diagnostic.GetMessage() + "code: \n" + codes[0]);
+                }
+                else
+                {
+                    throw new Exception(diagnostic.GetMessage());
+                }
             }
         }
 

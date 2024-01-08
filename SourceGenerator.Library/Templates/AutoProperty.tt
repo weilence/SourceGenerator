@@ -1,0 +1,26 @@
+﻿<#@ template language="C#" #>
+<#@ import namespace="Utils" #>
+// Auto-generated code
+<#
+    foreach (var @using in Model.Usings)
+    {
+#>
+<#= @using #>
+<#
+    }
+#>
+
+namespace <#= Model.Namespace #>
+{
+    public partial class <#= Model.Class #>
+    {
+<#
+    foreach (var field in Model.Fields)
+    {
+#>
+        public <#= field.Type #> <#= StringUtils.ToPascalCase(field.Name) #> { get => <#= field.Name #>; set => <#= field.Name #> = value; }
+<#
+    }
+#>
+    }
+}

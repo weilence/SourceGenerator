@@ -1,0 +1,35 @@
+<#@ template language="C#" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+// Auto-generated code
+namespace <#= Model.Namespace #>
+{
+<#
+    PushIndent("    ");
+    RenderClass(Model.Class);
+    PopIndent();
+#>
+}
+<#+
+    private void RenderClass(ClassInfo modelClass)
+    {
+        WriteLine($"public partial class {modelClass.Name}");
+        WriteLine("{");
+        PushIndent("    ");
+        foreach (var property in modelClass.Properties)
+        {
+            WriteLine($"public {property.Type} {property.Name} {{ get; set; }}");
+        }
+        PopIndent();
+        WriteLine("}");
+
+        foreach (var property in modelClass.Properties)
+        {
+            if (property.Class != null)
+            {
+                WriteLine("");
+                RenderClass(property.Class);
+            }
+        }
+    }
+#>
