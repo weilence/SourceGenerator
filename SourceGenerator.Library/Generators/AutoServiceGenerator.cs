@@ -2,112 +2,99 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SourceGenerator.Common;
-using SourceGenerator.Library.Receivers;
 using SourceGenerator.Library.Templates;
 using SourceGenerator.Library.Utils;
 
 namespace SourceGenerator.Library.Generators
 {
     [Generator]
-    public class AutoServiceGenerator : ISourceGenerator
+    public class AutoServiceGenerator : AutoArgsGenerator
     {
-        public void Initialize(GeneratorInitializationContext context)
+        private readonly List<AutoServiceItem> classList = new List<AutoServiceItem>();
+
+        public AutoServiceGenerator() : base(new[]
         {
-            context.RegisterForSyntaxNotifications(() =>
-                new ClassSyntaxReceiver(new List<string>
-                {
-                    nameof(ServiceAttribute), ServiceAttribute.Name
-                }));
+            nameof(ServiceAttribute),
+            ServiceAttribute.Name,
+        })
+        {
         }
 
-        public void Execute(GeneratorExecutionContext context)
+        protected override void Execute(GeneratorExecutionContext context, AttributeSyntax attributeSyntax)
         {
-            var receiver = (ClassSyntaxReceiver)context.SyntaxReceiver;
-            var syntaxList = receiver.AttributeSyntaxList;
+            base.Execute(context, attributeSyntax);
 
-            if (syntaxList.Count == 0)
+            var classDeclarationSyntax = attributeSyntax.FirstAncestorOrSelf<ClassDeclarationSyntax>();
+            if (classDeclarationSyntax == null)
             {
                 return;
             }
 
-            var classList = new List<AutoServiceItem>();
-            foreach (var classDeclarationSyntax in syntaxList)
+            var baseNamespaceDeclarationSyntax =
+                classDeclarationSyntax.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>();
+            var namespaceName = SyntaxUtils.GetName(baseNamespaceDeclarationSyntax);
+            var className = SyntaxUtils.GetName(classDeclarationSyntax);
+
+            var semanticModel = context.Compilation.GetSemanticModel(classDeclarationSyntax.SyntaxTree);
+
+            var modelItem = new AutoServiceItem()
             {
-                var attributeSyntax =
-                    SyntaxUtils.GetAttribute(classDeclarationSyntax, name => receiver.AttributeNames.Contains(name));
-                if (attributeSyntax == null)
+                Class = namespaceName + "." + className, Types = new List<string>(),
+            };
+
+            var argumentListArguments = attributeSyntax.ArgumentList?.Arguments;
+            if (argumentListArguments != null)
+            {
+                foreach (var argumentSyntax in argumentListArguments)
                 {
-                    continue;
-                }
-
-                var baseNamespaceDeclarationSyntax =
-                    classDeclarationSyntax.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>();
-                var namespaceName = SyntaxUtils.GetName(baseNamespaceDeclarationSyntax);
-                var className = SyntaxUtils.GetName(classDeclarationSyntax);
-
-                var semanticModel = context.Compilation.GetSemanticModel(classDeclarationSyntax.SyntaxTree);
-
-                var modelItem = new AutoServiceItem()
-                {
-                    Class = namespaceName + "." + className, Types = new List<string>()
-                };
-
-                var argumentListArguments = attributeSyntax.ArgumentList?.Arguments;
-                if (argumentListArguments != null)
-                {
-                    foreach (var argumentSyntax in argumentListArguments)
+                    var propertyName = SyntaxUtils.GetName(argumentSyntax.NameEquals);
+                    switch (propertyName)
                     {
-                        var propertyName = SyntaxUtils.GetName(argumentSyntax.NameEquals);
-                        switch (propertyName)
+                        case nameof(ServiceAttribute.Type):
                         {
-                            case nameof(ServiceAttribute.Type):
+                            if (argumentSyntax.Expression is TypeOfExpressionSyntax typeOfExpressionSyntax)
                             {
-                                if (argumentSyntax.Expression is TypeOfExpressionSyntax typeOfExpressionSyntax)
+                                var type = semanticModel.GetTypeInfo(typeOfExpressionSyntax.Type).Type;
+
+                                if (type != null)
                                 {
-                                    var type = semanticModel.GetTypeInfo(typeOfExpressionSyntax.Type).Type;
-
-                                    if (type != null)
-                                    {
-                                        modelItem.Types.Add(type.ToString());
-                                    }
+                                    modelItem.Types.Add(type.ToString());
                                 }
-
-                                break;
                             }
-                            case nameof(ServiceAttribute.Lifetime):
+
+                            break;
+                        }
+                        case nameof(ServiceAttribute.Lifetime):
+                        {
+                            if (argumentSyntax.Expression is MemberAccessExpressionSyntax
+                                memberAccessExpressionSyntax)
                             {
-                                if (argumentSyntax.Expression is MemberAccessExpressionSyntax
-                                    memberAccessExpressionSyntax)
-                                {
-                                    modelItem.Lifetime = memberAccessExpressionSyntax.ToString();
-                                }
-
-                                break;
+                                modelItem.Lifetime = memberAccessExpressionSyntax.ToString();
                             }
+
+                            break;
                         }
                     }
                 }
+            }
 
-                if (modelItem.Types.Count == 0 && classDeclarationSyntax.BaseList != null)
+            if (modelItem.Types.Count == 0 && classDeclarationSyntax.BaseList != null)
+            {
+                foreach (var baseTypeSyntax in classDeclarationSyntax.BaseList.Types)
                 {
-                    foreach (var baseTypeSyntax in classDeclarationSyntax.BaseList.Types)
+                    var type = semanticModel.GetTypeInfo(baseTypeSyntax.Type).Type;
+                    if (type != null)
                     {
-                        var type = semanticModel.GetTypeInfo(baseTypeSyntax.Type).Type;
-                        if (type != null)
-                        {
-                            modelItem.Types.Add(type.ToString());
-                        }
+                        modelItem.Types.Add(type.ToString());
                     }
                 }
-
-                classList.Add(modelItem);
             }
 
-            if (classList.Count == 0)
-            {
-                return;
-            }
+            classList.Add(modelItem);
+        }
 
+        protected override void AfterExecute(GeneratorExecutionContext context)
+        {
             context.AddSource($"AutoServiceExtension.Class.g.cs", new AutoService(classList).TransformText());
         }
     }

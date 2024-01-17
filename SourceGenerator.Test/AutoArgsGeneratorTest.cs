@@ -19,7 +19,7 @@ namespace SourceGenerator.Demo
     {
     }
 
-    [Service]
+    [Args]
     public partial class UserClass2
     {
         private readonly UserClass _test;
@@ -33,12 +33,16 @@ namespace SourceGenerator.Demo
 
         private string test5;
 
-        private readonly Dictionary<string, string> dic;
+        private readonly Dictionary<string, string> dic = new();
 
         public string test6;
 
         [Ignore]
         private readonly UserClass3 _test7;
+
+        private readonly string test8 = """";
+
+        private readonly int test9 = 0;
 
         private UserClass2(UserClass3 test7)
         {

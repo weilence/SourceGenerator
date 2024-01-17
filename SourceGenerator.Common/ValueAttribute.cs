@@ -2,6 +2,7 @@
 
 namespace SourceGenerator.Common
 {
+    [Obsolete]
     [AttributeUsage(AttributeTargets.Field)]
     public class ValueAttribute : Attribute
     {

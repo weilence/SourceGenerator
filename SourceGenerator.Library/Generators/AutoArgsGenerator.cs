@@ -4,168 +4,148 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SourceGenerator.Common;
-using SourceGenerator.Library.Receivers;
 using SourceGenerator.Library.Templates;
 using SourceGenerator.Library.Utils;
 
 namespace SourceGenerator.Library.Generators
 {
     [Generator]
-    public class AutoArgsGenerator : ISourceGenerator
+    public class AutoArgsGenerator : BaseGenerator
     {
-        public void Initialize(GeneratorInitializationContext context)
+        public AutoArgsGenerator(IEnumerable<string> attributeNames) : base(attributeNames)
         {
-            context.RegisterForSyntaxNotifications(() =>
-                new ClassSyntaxReceiver(new List<string>
-                {
-                    nameof(ArgsAttribute),
-                    ArgsAttribute.Name,
-                    nameof(ServiceAttribute),
-                    ServiceAttribute.Name,
-                }));
         }
 
-        public void Execute(GeneratorExecutionContext context)
+        public AutoArgsGenerator() : this(new[]
         {
-            var receiver = (ClassSyntaxReceiver)context.SyntaxReceiver;
-            var syntaxList = receiver.AttributeSyntaxList;
+            nameof(ArgsAttribute),
+            ArgsAttribute.Name,
+        })
+        {
+        }
 
-            if (syntaxList.Count == 0)
+        protected override void Execute(GeneratorExecutionContext context, AttributeSyntax attributeSyntax)
+        {
+            var classDeclarationSyntax = attributeSyntax.FirstAncestorOrSelf<ClassDeclarationSyntax>();
+            if (classDeclarationSyntax == null)
             {
                 return;
             }
 
-            foreach (var classDeclarationSyntax in syntaxList)
+            if (!ReportUtils.CheckPartial(context, classDeclarationSyntax))
             {
-                if (!ReportUtils.CheckPartial(context, classDeclarationSyntax))
+                return;
+            }
+
+            var fieldDeclarationList = classDeclarationSyntax.Members.OfType<FieldDeclarationSyntax>().ToList();
+            if (fieldDeclarationList.Count == 0)
+            {
+                return;
+            }
+
+            var semanticModel = context.Compilation.GetSemanticModel(classDeclarationSyntax.SyntaxTree);
+
+            var hasOptions = false;
+
+            var fields = new List<Field>();
+            foreach (var fieldDeclaration in fieldDeclarationList)
+            {
+                if (SyntaxUtils.HasModifier(fieldDeclaration, SyntaxKind.StaticKeyword, SyntaxKind.ConstKeyword))
                 {
                     continue;
                 }
 
-                var fieldDeclarationList = classDeclarationSyntax.Members.OfType<FieldDeclarationSyntax>().ToList();
-                if (fieldDeclarationList.Count == 0)
+                if (!SyntaxUtils.HasModifiers(fieldDeclaration, SyntaxKind.PrivateKeyword, SyntaxKind.ReadOnlyKeyword))
                 {
                     continue;
                 }
 
-                var semanticModel = context.Compilation.GetSemanticModel(classDeclarationSyntax.SyntaxTree);
-
-                var attributeSyntax =
-                    SyntaxUtils.GetAttribute(classDeclarationSyntax, name => receiver.AttributeNames.Contains(name));
-
-                var hasOptions = false;
-
-                var fields = new List<Field>();
-                foreach (var fieldDeclaration in fieldDeclarationList)
+                if (SyntaxUtils.HasAttribute(fieldDeclaration,
+                        name => new[]
+                        {
+                            IgnoreAttribute.Name,
+                            nameof(IgnoreAttribute),
+                        }.Contains(name)))
                 {
-                    if (SyntaxUtils.HasModifier(fieldDeclaration, SyntaxKind.StaticKeyword, SyntaxKind.ConstKeyword))
+                    continue;
+                }
+
+                var type = fieldDeclaration.Declaration.Type.ToString();
+                var isValue = SyntaxUtils.HasAttribute(fieldDeclaration,
+                    name => name == ValueAttribute.Name || name == nameof(ValueAttribute));
+                if (isValue)
+                {
+                    hasOptions = true;
+                }
+
+                foreach (var declarationVariable in fieldDeclaration.Declaration.Variables)
+                {
+                    if (declarationVariable.Initializer != null)
                     {
                         continue;
                     }
 
-                    if (!SyntaxUtils.HasModifiers(fieldDeclaration, SyntaxKind.PrivateKeyword,
-                            SyntaxKind.ReadOnlyKeyword))
+                    var name = SyntaxUtils.GetName(declarationVariable);
+                    fields.Add(new Field()
                     {
-                        continue;
+                        Name = name,
+                        Type = type,
+                        IsOptions = isValue,
+                    });
+                }
+            }
+
+            var constructorDeclarationSyntax =
+                classDeclarationSyntax.Members.OfType<ConstructorDeclarationSyntax>().FirstOrDefault(m =>
+                    SyntaxUtils.HasModifier(
+                        m, SyntaxKind.PrivateKeyword));
+
+            if (constructorDeclarationSyntax != null)
+            {
+                foreach (var parameterSyntax in constructorDeclarationSyntax.ParameterList.Parameters)
+                {
+                    var name = SyntaxUtils.GetName(parameterSyntax);
+                    var type = parameterSyntax.Type.ToString();
+
+                    var field = fields.FirstOrDefault(m => m.Type == type);
+                    if (field != null)
+                    {
+                        field.InBase = true;
                     }
-
-                    var fieldAttribute =
-                        SyntaxUtils.GetAttribute(fieldDeclaration, name => receiver.AttributeNames.Contains(name));
-
-                    if (fieldAttribute == null && attributeSyntax == null)
+                    else
                     {
-                        continue;
-                    }
-
-                    if (SyntaxUtils.HasAttribute(fieldDeclaration,
-                            name => new[]
-                            {
-                                IgnoreAttribute.Name,
-                                nameof(IgnoreAttribute)
-                            }.Contains(name)))
-                    {
-                        continue;
-                    }
-
-                    var type = fieldDeclaration.Declaration.Type.ToString();
-                    var typeInfo = semanticModel.GetTypeInfo(fieldDeclaration.Declaration.Type);
-                    var @namespace = typeInfo.Type?.ContainingNamespace.ToString();
-                    if (@namespace == "System.Collections.Generic" || @namespace == "System.Collections.Concurrent")
-                    {
-                        continue;
-                    }
-
-                    var isValue = SyntaxUtils.HasAttribute(fieldDeclaration,
-                        name => name == ValueAttribute.Name || name == nameof(ValueAttribute));
-                    if (isValue)
-                    {
-                        hasOptions = true;
-                    }
-
-                    foreach (var declarationVariable in fieldDeclaration.Declaration.Variables)
-                    {
-                        var name = SyntaxUtils.GetName(declarationVariable);
                         fields.Add(new Field()
                         {
                             Name = name,
                             Type = type,
-                            IsOptions = isValue,
+                            Ignore = true,
+                            InBase = true,
                         });
                     }
                 }
-
-                var constructorDeclarationSyntax =
-                    classDeclarationSyntax.Members.OfType<ConstructorDeclarationSyntax>().FirstOrDefault(m =>
-                        SyntaxUtils.HasModifier(
-                            m, SyntaxKind.PrivateKeyword));
-
-                if (constructorDeclarationSyntax != null)
-                {
-                    foreach (var parameterSyntax in constructorDeclarationSyntax.ParameterList.Parameters)
-                    {
-                        var name = SyntaxUtils.GetName(parameterSyntax);
-                        var type = parameterSyntax.Type.ToString();
-
-                        var field = fields.FirstOrDefault(m => m.Type == type);
-                        if (field != null)
-                        {
-                            field.InBase = true;
-                        }
-                        else
-                        {
-                            fields.Add(new Field()
-                            {
-                                Name = name,
-                                Type = type,
-                                Ignore = true,
-                                InBase = true,
-                            });
-                        }
-                    }
-                }
-
-                if (fields.Count == 0)
-                {
-                    continue;
-                }
-
-                var usings = SyntaxUtils.GetUsings(classDeclarationSyntax);
-                if (hasOptions && !usings.Contains("using Microsoft.Extensions.Options;"))
-                {
-                    usings.Add("using Microsoft.Extensions.Options;");
-                }
-
-                var model = new AutoArgsModel()
-                {
-                    Usings = usings,
-                    Namespace = SyntaxUtils.GetNamespaceName(classDeclarationSyntax),
-                    Class = SyntaxUtils.GetName(classDeclarationSyntax),
-                    Fields = fields,
-                    HasBase = constructorDeclarationSyntax != null,
-                };
-
-                context.AddSource($"{model.Namespace}.{model.Class}.g.cs", new AutoArgs(model).TransformText());
             }
+
+            if (fields.Count == 0)
+            {
+                return;
+            }
+
+            var usings = SyntaxUtils.GetUsings(classDeclarationSyntax);
+            if (hasOptions && !usings.Contains("using Microsoft.Extensions.Options;"))
+            {
+                usings.Add("using Microsoft.Extensions.Options;");
+            }
+
+            var model = new AutoArgsModel()
+            {
+                Usings = usings,
+                Namespace = SyntaxUtils.GetNamespaceName(classDeclarationSyntax),
+                Class = SyntaxUtils.GetName(classDeclarationSyntax),
+                Fields = fields,
+                HasBase = constructorDeclarationSyntax != null,
+            };
+
+            context.AddSource($"{model.Namespace}.{model.Class}.g.cs", new AutoArgs(model).TransformText());
         }
     }
 }
