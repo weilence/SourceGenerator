@@ -13,9 +13,25 @@ namespace <#= Model.Namespace #>
 {
     public partial class <#= Model.Class #>
     {
-        public <#= Model.Class #>(<#= WriteParameters(Model.Fields) #>)<#= WriteInitializer(Model) #>
+<#
+    if (Model.HasLogger)
+    {
+#>
+        private readonly ILogger<<#= Model.Class #>> _logger;
+
+<#
+    }
+#>
+        public <#= Model.Class #>(<#= WriteParameters(Model) #>)<#= WriteInitializer(Model) #>
         {
 <#
+    if (Model.HasLogger)
+    {
+#>
+            this._logger = logger;
+<#
+    }
+
     for (var i = 0; i < Model.Fields.Count; i++)
     {
         var field = Model.Fields[i];
@@ -42,17 +58,31 @@ namespace <#= Model.Namespace #>
     }
 }
 <#+
-    string WriteParameters(IList<Field> fields)
+    string WriteParameters(AutoArgsModel model)
     {
         var sb = new StringBuilder();
-        for (var i = 0; i < fields.Count; i++)
+        if (model.HasLogger)
         {
-            var field = fields[i];
+            sb.Append("ILogger<");
+            sb.Append(model.Class);
+            if (model.Fields.Count == 0)
+            {
+                sb.Append("> logger");
+            }
+            else
+            {
+                sb.Append("> logger, ");
+            }
+        }
+
+        for (var i = 0; i < model.Fields.Count; i++)
+        {
+            var field = model.Fields[i];
             sb.Append(field.IsOptions ? $"IOptions<{field.Type}>" : field.Type);
             sb.Append(" a");
             sb.Append(i);
 
-            if (i < fields.Count - 1)
+            if (i < model.Fields.Count - 1)
             {
                 sb.Append(", ");
             }

@@ -2,6 +2,7 @@
 
 namespace SourceGenerator.Demo;
 
+[Logger]
 [Service(Type = typeof(IAutoArgsClass))]
 public partial class AutoArgsClass : IAutoArgsClass
 {

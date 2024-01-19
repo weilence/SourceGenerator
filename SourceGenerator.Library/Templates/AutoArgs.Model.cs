@@ -13,5 +13,6 @@
     public class AutoArgsModel : ClassModel
     {
         public bool HasBase { get; set; }
+        public bool HasLogger { get; set; }
     }
 }

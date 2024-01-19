@@ -8,7 +8,7 @@ using SourceGenerator.Library.Utils;
 namespace SourceGenerator.Library.Generators
 {
     [Generator]
-    public class AutoServiceGenerator : AutoArgsGenerator
+    public class AutoServiceGenerator : BaseGenerator
     {
         private readonly List<AutoServiceItem> classList = new List<AutoServiceItem>();
 
@@ -22,8 +22,6 @@ namespace SourceGenerator.Library.Generators
 
         protected override void Execute(GeneratorExecutionContext context, AttributeSyntax attributeSyntax)
         {
-            base.Execute(context, attributeSyntax);
-
             var classDeclarationSyntax = attributeSyntax.FirstAncestorOrSelf<ClassDeclarationSyntax>();
             if (classDeclarationSyntax == null)
             {
@@ -95,7 +93,7 @@ namespace SourceGenerator.Library.Generators
 
         protected override void AfterExecute(GeneratorExecutionContext context)
         {
-            context.AddSource($"AutoServiceExtension.Class.g.cs", new AutoService(classList).TransformText());
+            context.AddSource("AutoServiceExtension.Class.g.cs", new AutoService(classList).TransformText());
         }
     }
 }

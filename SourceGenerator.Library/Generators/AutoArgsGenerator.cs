@@ -20,6 +20,8 @@ namespace SourceGenerator.Library.Generators
         {
             nameof(ArgsAttribute),
             ArgsAttribute.Name,
+            nameof(ServiceAttribute),
+            ServiceAttribute.Name,
         })
         {
         }
@@ -37,13 +39,12 @@ namespace SourceGenerator.Library.Generators
                 return;
             }
 
+            var hasLogger = HasLogger(classDeclarationSyntax);
             var fieldDeclarationList = classDeclarationSyntax.Members.OfType<FieldDeclarationSyntax>().ToList();
-            if (fieldDeclarationList.Count == 0)
+            if (!hasLogger && fieldDeclarationList.Count == 0)
             {
                 return;
             }
-
-            var semanticModel = context.Compilation.GetSemanticModel(classDeclarationSyntax.SyntaxTree);
 
             var hasOptions = false;
 
@@ -125,7 +126,7 @@ namespace SourceGenerator.Library.Generators
                 }
             }
 
-            if (fields.Count == 0)
+            if (!hasLogger && fields.Count == 0)
             {
                 return;
             }
@@ -136,6 +137,11 @@ namespace SourceGenerator.Library.Generators
                 usings.Add("using Microsoft.Extensions.Options;");
             }
 
+            if (hasLogger)
+            {
+                usings.Add("using Microsoft.Extensions.Logging;");
+            }
+
             var model = new AutoArgsModel()
             {
                 Usings = usings,
@@ -143,9 +149,20 @@ namespace SourceGenerator.Library.Generators
                 Class = SyntaxUtils.GetName(classDeclarationSyntax),
                 Fields = fields,
                 HasBase = constructorDeclarationSyntax != null,
+                HasLogger = hasLogger,
             };
 
             context.AddSource($"{model.Namespace}.{model.Class}.g.cs", new AutoArgs(model).TransformText());
+        }
+
+        private bool HasLogger(ClassDeclarationSyntax classDeclarationSyntax)
+        {
+            return SyntaxUtils.HasAttribute(classDeclarationSyntax,
+                name => new[]
+                {
+                    LoggerAttribute.Name,
+                    nameof(LoggerAttribute),
+                }.Contains(name));
         }
     }
 }

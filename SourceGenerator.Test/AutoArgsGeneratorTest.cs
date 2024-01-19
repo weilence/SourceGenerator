@@ -7,7 +7,7 @@ namespace SourceGenerator.Test;
 public class AutoArgsGeneratorTest : BaseTest
 {
     [Fact]
-    public void Test()
+    public void Test_Base()
     {
         var source1 = @"
 using SourceGenerator.Common;
@@ -20,6 +20,7 @@ namespace SourceGenerator.Demo
     }
 
     [Args]
+    [Logger]
     public partial class UserClass2
     {
         private readonly UserClass _test;
@@ -59,13 +60,17 @@ namespace SourceGenerator.Demo
 using SourceGenerator.Common;
 using System.Collections.Generic;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
 
 namespace SourceGenerator.Demo
 {
     public partial class UserClass2
     {
-        public UserClass2(UserClass a0, UserClass a1, UserClass a2, IOptions<UserClass> a3, UserClass3 a4) : this(a4)
+        private readonly ILogger<UserClass2> _logger;
+
+        public UserClass2(ILogger<UserClass2> logger, UserClass a0, UserClass a1, UserClass a2, IOptions<UserClass> a3, UserClass3 a4) : this(a4)
         {
+            this._logger = logger;
             this._test = a0;
             this._test2 = a1;
             this._test3 = a2;
@@ -76,6 +81,45 @@ namespace SourceGenerator.Demo
 ".ReplaceLineEndings();
 
         var actual = Run<AutoArgsGenerator>(source1).FirstOrDefault();
+
+        Assert.Equal(expected, actual);
+    }
+
+
+    [Fact]
+    public void Test_OnlyLogger()
+    {
+        var source = @"
+using SourceGenerator.Common;
+
+namespace SourceGenerator.Demo
+{
+    [Logger]
+    [Args]
+    public partial class UserClass
+    {
+    }
+}
+";
+        var expected = @"// Auto-generated code
+using SourceGenerator.Common;
+using Microsoft.Extensions.Logging;
+
+namespace SourceGenerator.Demo
+{
+    public partial class UserClass
+    {
+        private readonly ILogger<UserClass> _logger;
+
+        public UserClass(ILogger<UserClass> logger)
+        {
+            this._logger = logger;
+        }
+    }
+}
+".ReplaceLineEndings();
+
+        var actual = Run<AutoArgsGenerator>(source).FirstOrDefault();
 
         Assert.Equal(expected, actual);
     }

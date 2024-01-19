@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SourceGenerator.Common;
 
@@ -76,6 +77,7 @@ public abstract class BaseTest
         assemblies.Add(MetadataReference.CreateFromFile(typeof(IServiceCollection).Assembly.Location));
         assemblies.Add(MetadataReference.CreateFromFile(typeof(PropertyAttribute).Assembly.Location));
         assemblies.Add(MetadataReference.CreateFromFile(typeof(IOptions<>).Assembly.Location));
+        assemblies.Add(MetadataReference.CreateFromFile(typeof(ILogger<>).Assembly.Location));
 
         var syntaxTrees = sources.Select(m => CSharpSyntaxTree.ParseText(m));
         var compilation = CSharpCompilation.Create("compilation", syntaxTrees, assemblies,
