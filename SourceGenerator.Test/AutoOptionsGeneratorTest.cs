@@ -41,6 +41,6 @@ namespace compilation
 
         var actual = Run<AutoOptionsGenerator>(source);
 
-        Assert.Equal(expected, actual[0]);
+        Assert.Equal(expected, actual[1]);
     }
 }

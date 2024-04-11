@@ -1,23 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using SourceGenerator.Library.Models;
 
 namespace SourceGenerator.Library.Templates
 {
-    public class ClassModel
+    public record ClassModel
     {
         public string Namespace { get; set; }
 
         public string Class { get; set; }
 
-        public List<Field> Fields { get; set; }
-        public List<string> Usings { get; set; }
+        public ValueArray<Field> Fields { get; set; }
+        public ValueArray<string> Usings { get; set; }
     }
 
     public class Field
     {
         public string Type { get; set; }
-
         public string Name { get; set; }
-        public bool IsOptions { get; set; }
         public bool InBase { get; set; }
         public bool Ignore { get; set; }
     }

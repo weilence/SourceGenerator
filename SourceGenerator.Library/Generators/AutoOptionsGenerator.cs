@@ -1,97 +1,124 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
+using System.Linq;
+using System.Text;
 using System.Text.Json;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using SourceGenerator.Common;
+using Microsoft.CodeAnalysis.Text;
+using SourceGenerator.Library.Models;
 using SourceGenerator.Library.Templates;
 using SourceGenerator.Library.Utils;
 
 namespace SourceGenerator.Library.Generators
 {
     [Generator]
-    public class AutoOptionsGenerator : BaseGenerator
+    public class AutoOptionsGenerator : IIncrementalGenerator
     {
-        public static Dictionary<string, string> namePath = new Dictionary<string, string>();
-
-        public AutoOptionsGenerator() : base(
-            new[]
-            {
-                nameof(OptionsAttribute),
-                OptionsAttribute.Name,
-            }
-        )
+        public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-        }
-
-        protected override void Execute(GeneratorExecutionContext context, AttributeSyntax attributeSyntax)
-        {
-            var classDeclarationSyntax = attributeSyntax.FirstAncestorOrSelf<ClassDeclarationSyntax>();
-            if (classDeclarationSyntax == null)
+            context.RegisterPostInitializationOutput(static postInitializationContext =>
             {
-                return;
-            }
+                postInitializationContext.AddSource("OptionsAttribute.cs", SourceText.From("""
+                    using System;
+                    using System.Collections.Generic;
 
-            var classInfoName = SyntaxUtils.GetName(classDeclarationSyntax);
+                    namespace SourceGenerator.Common
+                    {
+                        [AttributeUsage(AttributeTargets.Class)]
+                        public class OptionsAttribute : Attribute
+                        {
+                            public string Path { get; set; }
+                        }
+                    }
+                    """, Encoding.UTF8));
+            });
 
-            if (!context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.projectdir",
-                    out var projectDir))
+            var projectDirProvider = context.AnalyzerConfigOptionsProvider.Select((context, cancellationToken) =>
             {
-                if (!namePath.ContainsKey(classInfoName))
+                if (!context.GlobalOptions.TryGetValue("build_property.projectdir", out var projectDir))
+                {
+                    return "";
+                }
+
+                return projectDir;
+            });
+
+            var pipeline = context.SyntaxProvider.ForAttributeWithMetadataName(
+                "SourceGenerator.Common.OptionsAttribute",
+                static (syntaxNode, cancellationToken) => true,
+                static (context, cancellationToken) =>
+                {
+                    var classDeclarationSyntax = (ClassDeclarationSyntax)context.TargetNode;
+                    var classInfoName = SyntaxUtils.GetName(classDeclarationSyntax);
+
+                    var model = new GeneratedModel<AutoOptionsModel>();
+
+                    if (!SyntaxUtils.HasModifier(classDeclarationSyntax, SyntaxKind.PartialKeyword))
+                    {
+                        model.Diagnostics.Add(Diagnostic.Create(DiagnosticDescriptors.SGL001,
+                            classDeclarationSyntax.GetLocation(),
+                            classInfoName));
+                        return model;
+                    }
+
+                    string path = null;
+                    foreach (var keyValuePair in context.Attributes.FirstOrDefault().NamedArguments)
+                    {
+                        if (keyValuePair.Key == "Path")
+                        {
+                            path = keyValuePair.Value.Value.ToString();
+                        }
+                    }
+
+                    var data = new AutoOptionsModel()
+                    {
+                        Namespace = context.TargetSymbol.ContainingNamespace.ToString(),
+                        Class = new ClassInfo()
+                        {
+                            Name = context.TargetSymbol.Name,
+                        },
+                        Path = path,
+                    };
+
+                    model.Data = data;
+                    return model;
+                }
+            );
+
+            var combinedPipeline = pipeline.Combine(projectDirProvider)
+                .Where((tuple => tuple.Right != "" && tuple.Left.Data?.Path != null))
+                .Select((tuple, token) =>
+                {
+                    tuple.Left.Data.Path = Path.Combine(tuple.Right, tuple.Left.Data.Path);
+                    return tuple.Left;
+                });
+
+            context.RegisterSourceOutput(combinedPipeline, (sourceOutputContext, model) =>
+            {
+                if (model.HasError)
+                {
+                    foreach (var diagnostic in model.Diagnostics)
+                    {
+                        sourceOutputContext.ReportDiagnostic(diagnostic);
+                    }
+
+                    return;
+                }
+
+                if (model.Data == null)
                 {
                     return;
                 }
 
-                projectDir = namePath[classInfoName];
-            }
-            else
-            {
-                namePath[classInfoName] = projectDir;
-            }
-
-            if (!SyntaxUtils.HasModifier(classDeclarationSyntax, SyntaxKind.PartialKeyword))
-            {
-                context.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.SGL001,
-                    classDeclarationSyntax.GetLocation(),
-                    classInfoName));
-                return;
-            }
-
-
-            var semanticModel = context.Compilation.GetSemanticModel(classDeclarationSyntax.SyntaxTree);
-            var attributeValue = SemanticUtils.GetAttributeValue(semanticModel, attributeSyntax);
-            if (!attributeValue.TryGetValue(nameof(OptionsAttribute.Path), out var path))
-            {
-                return;
-            }
-
-            path = Path.Combine(projectDir, path);
-
-#pragma warning disable RS1035
-            if (!File.Exists(path))
-#pragma warning restore RS1035
-            {
-                return;
-            }
-
-#pragma warning disable RS1035
-            var appSettingsFile = File.ReadAllText(path);
-#pragma warning restore RS1035
-
-            var rootElement = JsonDocument.Parse(appSettingsFile).RootElement;
-            var classInfo = JsonUtils.ParseJson(rootElement);
-
-            var baseNamespaceDeclarationSyntax =
-                classDeclarationSyntax.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>();
-            var namespaceName = SyntaxUtils.GetName(baseNamespaceDeclarationSyntax);
-            classInfo.Name = classInfoName;
-            var model = new AutoOptionsModel()
-            {
-                Namespace = namespaceName, Class = classInfo,
-            };
-
-            context.AddSource(classInfo.Name + ".g.cs", new AutoOptions(model).TransformText());
+                var appSettingsFile = File.ReadAllText(model.Data.Path);
+                var rootElement = JsonDocument.Parse(appSettingsFile).RootElement;
+                var classInfo = JsonUtils.ParseJson(rootElement);
+                var data = model.Data;
+                classInfo.Name = data.Class.Name;
+                data.Class = classInfo;
+                sourceOutputContext.AddSource(data.Class.Name + ".g.cs", new AutoOptions(data).TransformText());
+            });
         }
     }
 }

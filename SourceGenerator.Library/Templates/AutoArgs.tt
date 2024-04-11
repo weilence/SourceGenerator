@@ -25,13 +25,6 @@ namespace <#= Model.Namespace #>
         public <#= Model.Class #>(<#= WriteParameters(Model) #>)<#= WriteInitializer(Model) #>
         {
 <#
-    if (Model.HasLogger)
-    {
-#>
-            this._logger = logger;
-<#
-    }
-
     for (var i = 0; i < Model.Fields.Count; i++)
     {
         var field = Model.Fields[i];
@@ -39,19 +32,9 @@ namespace <#= Model.Namespace #>
         {
             continue;
         }
-
-        if (field.IsOptions)
-        {
-#>
-            this.<#= field.Name #> = a<#= i #>.Value;
-<#
-        }
-        else
-        {
 #>
             this.<#= field.Name #> = a<#= i #>;
 <#
-        }
     }
 #>
         }
@@ -61,24 +44,10 @@ namespace <#= Model.Namespace #>
     string WriteParameters(AutoArgsModel model)
     {
         var sb = new StringBuilder();
-        if (model.HasLogger)
-        {
-            sb.Append("ILogger<");
-            sb.Append(model.Class);
-            if (model.Fields.Count == 0)
-            {
-                sb.Append("> logger");
-            }
-            else
-            {
-                sb.Append("> logger, ");
-            }
-        }
-
         for (var i = 0; i < model.Fields.Count; i++)
         {
             var field = model.Fields[i];
-            sb.Append(field.IsOptions ? $"IOptions<{field.Type}>" : field.Type);
+            sb.Append(field.Type);
             sb.Append(" a");
             sb.Append(i);
 

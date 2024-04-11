@@ -17,7 +17,7 @@ namespace SourceGenerator.Library.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
+    #line 1 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "16.0.0.0")]
     public partial class AutoArgs : AutoArgsBase
     {
@@ -29,7 +29,7 @@ namespace SourceGenerator.Library.Templates
         {
             this.Write("// Auto-generated code\r\n");
             
-            #line 5 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
+            #line 5 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
 
     foreach (var @using in Model.Usings)
     {
@@ -41,21 +41,21 @@ namespace SourceGenerator.Library.Templates
             #line hidden
             this.Write("\r\nnamespace ");
             
-            #line 12 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
+            #line 12 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.Namespace));
             
             #line default
             #line hidden
             this.Write("\r\n{\r\n    public partial class ");
             
-            #line 14 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
+            #line 14 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.Class));
             
             #line default
             #line hidden
             this.Write("\r\n    {\r\n");
             
-            #line 16 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
+            #line 16 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
 
     if (Model.HasLogger)
     {
@@ -65,14 +65,14 @@ namespace SourceGenerator.Library.Templates
             #line hidden
             this.Write("        private readonly ILogger<");
             
-            #line 20 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
+            #line 20 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.Class));
             
             #line default
             #line hidden
             this.Write("> _logger;\r\n\r\n");
             
-            #line 22 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
+            #line 22 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
 
     }
 
@@ -81,40 +81,28 @@ namespace SourceGenerator.Library.Templates
             #line hidden
             this.Write("        public ");
             
-            #line 25 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
+            #line 25 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Model.Class));
             
             #line default
             #line hidden
             this.Write("(");
             
-            #line 25 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
+            #line 25 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(WriteParameters(Model)));
             
             #line default
             #line hidden
             this.Write(")");
             
-            #line 25 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
+            #line 25 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(WriteInitializer(Model)));
             
             #line default
             #line hidden
             this.Write("\r\n        {\r\n");
             
-            #line 27 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
-
-    if (Model.HasLogger)
-    {
-
-            
-            #line default
-            #line hidden
-            this.Write("            this._logger = logger;\r\n");
-            
-            #line 32 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
-
-    }
+            #line 27 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
 
     for (var i = 0; i < Model.Fields.Count; i++)
     {
@@ -124,56 +112,27 @@ namespace SourceGenerator.Library.Templates
             continue;
         }
 
-        if (field.IsOptions)
-        {
-
             
             #line default
             #line hidden
             this.Write("            this.");
             
-            #line 46 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
+            #line 36 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(field.Name));
             
             #line default
             #line hidden
             this.Write(" = a");
             
-            #line 46 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(i));
-            
-            #line default
-            #line hidden
-            this.Write(".Value;\r\n");
-            
-            #line 47 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
-
-        }
-        else
-        {
-
-            
-            #line default
-            #line hidden
-            this.Write("            this.");
-            
-            #line 52 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(field.Name));
-            
-            #line default
-            #line hidden
-            this.Write(" = a");
-            
-            #line 52 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
+            #line 36 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(i));
             
             #line default
             #line hidden
             this.Write(";\r\n");
             
-            #line 53 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
+            #line 37 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
 
-        }
     }
 
             
@@ -183,29 +142,15 @@ namespace SourceGenerator.Library.Templates
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 60 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
+        #line 43 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoArgs.tt"
 
     string WriteParameters(AutoArgsModel model)
     {
         var sb = new StringBuilder();
-        if (model.HasLogger)
-        {
-            sb.Append("ILogger<");
-            sb.Append(model.Class);
-            if (model.Fields.Count == 0)
-            {
-                sb.Append("> logger");
-            }
-            else
-            {
-                sb.Append("> logger, ");
-            }
-        }
-
         for (var i = 0; i < model.Fields.Count; i++)
         {
             var field = model.Fields[i];
-            sb.Append(field.IsOptions ? $"IOptions<{field.Type}>" : field.Type);
+            sb.Append(field.Type);
             sb.Append(" a");
             sb.Append(i);
 

@@ -1,4 +1,5 @@
-﻿using SourceGenerator.Library.Generators;
+﻿using System.Collections.Generic;
+using SourceGenerator.Library.Generators;
 using Xunit;
 
 namespace SourceGenerator.Test;
@@ -11,15 +12,17 @@ public class AutoServiceGeneratorTest : BaseTest
         var source = new[]
         {
             @"using SourceGenerator.Common;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace SourceGenerator.Demo;
 
-[Service]
+[Service(Lifetime = ServiceLifetime.Scoped)]
 public class AutoServiceClass
 {
     
 }",
             @"using SourceGenerator.Common;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace SourceGenerator.Demo2;
 
@@ -33,7 +36,7 @@ public interface IAutoServiceClass
 {
 }
 
-[Service]
+[Service(typeof(IAutoServiceClass))]
 public class AutoServiceClass3 : IAutoServiceClass
 {
     
@@ -49,7 +52,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddAutoServices(this IServiceCollection services, ServiceLifetime lifetime = ServiceLifetime.Singleton)
         {
-            AddService(services, typeof(SourceGenerator.Demo.AutoServiceClass), typeof(SourceGenerator.Demo.AutoServiceClass), lifetime);
+            AddService(services, typeof(SourceGenerator.Demo.AutoServiceClass), typeof(SourceGenerator.Demo.AutoServiceClass), Microsoft.Extensions.DependencyInjection.ServiceLifetime.Scoped);
             AddService(services, typeof(SourceGenerator.Demo2.AutoServiceClass2), typeof(SourceGenerator.Demo2.AutoServiceClass2), lifetime);
             AddService(services, typeof(SourceGenerator.Demo2.IAutoServiceClass), typeof(SourceGenerator.Demo2.AutoServiceClass3), lifetime);
             return services;
@@ -77,7 +80,7 @@ namespace Microsoft.Extensions.DependencyInjection
 ".ReplaceLineEndings();
         var actual = Run<AutoServiceGenerator>(source);
 
-        Assert.Equal(expected, actual[0]);
+        Assert.Equal(expected, actual[1]);
     }
 
     [Fact]
@@ -102,23 +105,7 @@ namespace SourceGenerator.Demo
 }",
         };
 
-        var expected = new[]
-        {
-            @"// Auto-generated code
-using SourceGenerator.Common;
-using System.Collections.Generic;
-
-namespace SourceGenerator.Demo
-{
-    public partial class UserClass2
-    {
-        public UserClass2(UserClass a0)
-        {
-            this._test = a0;
-        }
-    }
-}
-".ReplaceLineEndings(),
+        var expected =
             @"// Auto-generated code
 using System;
 
@@ -151,11 +138,10 @@ namespace Microsoft.Extensions.DependencyInjection
         }
     }
 }
-".ReplaceLineEndings(),
-        };
+".ReplaceLineEndings();
 
         var actual = Run<AutoServiceGenerator>(source);
 
-        Assert.Equal(expected, actual);
+        Assert.Equal(expected, actual[1]);
     }
 }

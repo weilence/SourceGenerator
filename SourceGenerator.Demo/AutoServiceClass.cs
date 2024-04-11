@@ -6,4 +6,5 @@ namespace SourceGenerator.Demo;
 [Service(Lifetime = ServiceLifetime.Scoped)]
 public partial class AutoServiceClass
 {
+    private readonly AutoArgsClass _autoArgsClass;
 }

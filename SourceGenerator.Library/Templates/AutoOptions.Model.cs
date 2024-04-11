@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using SourceGenerator.Library.Models;
 
 namespace SourceGenerator.Library.Templates
 {
@@ -12,21 +13,23 @@ namespace SourceGenerator.Library.Templates
         }
     }
 
-    public class AutoOptionsModel
+    public record AutoOptionsModel
     {
         public string Namespace { get; set; }
 
         public ClassInfo Class { get; set; }
+
+        public string Path { get; set; }
     }
 
-    public class ClassInfo
+    public record ClassInfo
     {
         public string Name { get; set; }
 
-        public List<PropertyInfo> Properties { get; set; }
+        public ValueArray<PropertyInfo> Properties { get; set; }
     }
 
-    public class PropertyInfo
+    public record PropertyInfo
     {
         public string Name { get; set; }
 

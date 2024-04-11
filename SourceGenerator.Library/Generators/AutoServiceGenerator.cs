@@ -1,99 +1,101 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using SourceGenerator.Common;
+using Microsoft.CodeAnalysis.Text;
+using SourceGenerator.Library.Models;
 using SourceGenerator.Library.Templates;
 using SourceGenerator.Library.Utils;
 
 namespace SourceGenerator.Library.Generators
 {
     [Generator]
-    public class AutoServiceGenerator : BaseGenerator
+    public class AutoServiceGenerator : IIncrementalGenerator
     {
-        private readonly List<AutoServiceItem> classList = new List<AutoServiceItem>();
-
-        public AutoServiceGenerator() : base(new[]
+        public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-            nameof(ServiceAttribute),
-            ServiceAttribute.Name,
-        })
-        {
-        }
-
-        protected override void Execute(GeneratorExecutionContext context, AttributeSyntax attributeSyntax)
-        {
-            var classDeclarationSyntax = attributeSyntax.FirstAncestorOrSelf<ClassDeclarationSyntax>();
-            if (classDeclarationSyntax == null)
+            context.RegisterPostInitializationOutput(static postInitializationContext =>
             {
-                return;
-            }
+                postInitializationContext.AddSource("ServiceAttribute.cs", SourceText.From("""
+                    using System;
+                    using Microsoft.Extensions.DependencyInjection;
 
-            var baseNamespaceDeclarationSyntax =
-                classDeclarationSyntax.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>();
-            var namespaceName = SyntaxUtils.GetName(baseNamespaceDeclarationSyntax);
-            var className = SyntaxUtils.GetName(classDeclarationSyntax);
-
-            var semanticModel = context.Compilation.GetSemanticModel(classDeclarationSyntax.SyntaxTree);
-
-            var modelItem = new AutoServiceItem()
-            {
-                Class = namespaceName + "." + className, Types = new List<string>(),
-            };
-
-            var argumentListArguments = attributeSyntax.ArgumentList?.Arguments;
-            if (argumentListArguments != null)
-            {
-                foreach (var argumentSyntax in argumentListArguments)
-                {
-                    var propertyName = SyntaxUtils.GetName(argumentSyntax.NameEquals);
-                    switch (propertyName)
+                    namespace SourceGenerator.Common
                     {
-                        case nameof(ServiceAttribute.Type):
+                        [AttributeUsage(AttributeTargets.Class)]
+                        public class ServiceAttribute : Attribute
                         {
-                            if (argumentSyntax.Expression is TypeOfExpressionSyntax typeOfExpressionSyntax)
+                            public Type[] Types { get; set; }
+                            
+                            public ServiceLifetime Lifetime { get; set; }
+                            
+                            public ServiceAttribute(params Type[] types)
                             {
-                                var type = semanticModel.GetTypeInfo(typeOfExpressionSyntax.Type).Type;
-
-                                if (type != null)
-                                {
-                                    modelItem.Types.Add(type.ToString());
-                                }
+                                Types = types;
                             }
-
-                            break;
-                        }
-                        case nameof(ServiceAttribute.Lifetime):
-                        {
-                            if (argumentSyntax.Expression is MemberAccessExpressionSyntax
-                                memberAccessExpressionSyntax)
-                            {
-                                modelItem.Lifetime = memberAccessExpressionSyntax.ToString();
-                            }
-
-                            break;
                         }
                     }
-                }
-            }
+                    """, Encoding.UTF8));
+            });
 
-            if (modelItem.Types.Count == 0 && classDeclarationSyntax.BaseList != null)
-            {
-                foreach (var baseTypeSyntax in classDeclarationSyntax.BaseList.Types)
+            var pipeline1 = context.SyntaxProvider.ForAttributeWithMetadataName(
+                "SourceGenerator.Common.ServiceAttribute",
+                static (syntaxNode, cancellationToken) => true,
+                static (context, cancellationToken) =>
                 {
-                    var type = semanticModel.GetTypeInfo(baseTypeSyntax.Type).Type;
-                    if (type != null)
+                    var model = new GeneratedModel<AutoServiceItem>();
+                    var data = new AutoServiceItem()
                     {
-                        modelItem.Types.Add(type.ToString());
+                        Class = context.TargetSymbol.ToString(), Types = new List<string>(),
+                    };
+
+                    var attributeData = context.Attributes.FirstOrDefault();
+                    foreach (var attributeDataConstructorArgument in attributeData.ConstructorArguments)
+                    {
+                        foreach (var value in attributeDataConstructorArgument.Values)
+                        {
+                            data.Types.Add(value.ToCSharpString());
+                        }
                     }
+
+                    foreach (var argumentSyntax in attributeData.NamedArguments)
+                    {
+                        data.Lifetime = argumentSyntax.Value.ToCSharpString();
+                    }
+
+                    model.Data = data;
+                    return model;
                 }
-            }
+            );
 
-            classList.Add(modelItem);
-        }
+            var errorProvider = pipeline1.Where(model => model.HasError);
+            context.RegisterSourceOutput(errorProvider, static (sourceOutputContext, models) =>
+            {
+                foreach (var diagnostic in models.Diagnostics)
+                {
+                    sourceOutputContext.ReportDiagnostic(diagnostic);
+                }
+            });
 
-        protected override void AfterExecute(GeneratorExecutionContext context)
-        {
-            context.AddSource("AutoServiceExtension.Class.g.cs", new AutoService(classList).TransformText());
+            var successProvider = pipeline1.Where(model => !model.HasError && model.Data != null)
+                .Select((m, _) => m.Data)
+                .Collect();
+            context.RegisterSourceOutput(successProvider,
+                static (sourceOutputContext, data) =>
+                {
+                    sourceOutputContext.AddSource("AutoServiceExtension.Class.g.cs",
+                        new AutoService(data).TransformText());
+                });
+
+            var pipeline2 = context.SyntaxProvider.ForAttributeWithMetadataName(
+                "SourceGenerator.Common.ServiceAttribute",
+                static (_, _) => true,
+                AutoArgsGenerator.Transform
+            );
+
+            context.RegisterSourceOutput(pipeline2, AutoArgsGenerator.Output);
         }
     }
 }

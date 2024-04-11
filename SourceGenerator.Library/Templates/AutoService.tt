@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.DependencyInjection
     foreach (var @class in ClassList)
     {
         var lifetime = "lifetime";
-        if (@class.Lifetime == "")
+        if (@class.Lifetime != null)
         {
             lifetime = @class.Lifetime;
         }
@@ -21,7 +21,7 @@ namespace Microsoft.Extensions.DependencyInjection
             foreach (var type in @class.Types)
             {
 #>
-            AddService(services, typeof(<#= type #>), typeof(<#= @class.Class #>), <#= lifetime #>);
+            AddService(services, <#= type #>, typeof(<#= @class.Class #>), <#= lifetime #>);
 <#
             }
         }

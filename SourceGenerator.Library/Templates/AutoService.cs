@@ -15,7 +15,7 @@ namespace SourceGenerator.Library.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoService.tt"
+    #line 1 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoService.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "16.0.0.0")]
     public partial class AutoService : AutoServiceBase
     {
@@ -27,12 +27,12 @@ namespace SourceGenerator.Library.Templates
         {
             this.Write("// Auto-generated code\r\nusing System;\r\n\r\nnamespace Microsoft.Extensions.DependencyInjection\r\n{\r\n    public static class AutoServiceExtension\r\n    {\r\n        public static IServiceCollection AddAutoServices(this IServiceCollection services, ServiceLifetime lifetime = ServiceLifetime.Singleton)\r\n        {\r\n");
             
-            #line 11 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoService.tt"
+            #line 11 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoService.tt"
 
     foreach (var @class in ClassList)
     {
         var lifetime = "lifetime";
-        if (@class.Lifetime == "")
+        if (@class.Lifetime != null)
         {
             lifetime = @class.Lifetime;
         }
@@ -44,30 +44,30 @@ namespace SourceGenerator.Library.Templates
             
             #line default
             #line hidden
-            this.Write("            AddService(services, typeof(");
+            this.Write("            AddService(services, ");
             
-            #line 24 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoService.tt"
+            #line 24 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoService.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(type));
             
             #line default
             #line hidden
-            this.Write("), typeof(");
+            this.Write(", typeof(");
             
-            #line 24 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoService.tt"
+            #line 24 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoService.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(@class.Class));
             
             #line default
             #line hidden
             this.Write("), ");
             
-            #line 24 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoService.tt"
+            #line 24 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoService.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(lifetime));
             
             #line default
             #line hidden
             this.Write(");\r\n");
             
-            #line 25 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoService.tt"
+            #line 25 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoService.tt"
 
             }
         }
@@ -79,28 +79,28 @@ namespace SourceGenerator.Library.Templates
             #line hidden
             this.Write("            AddService(services, typeof(");
             
-            #line 31 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoService.tt"
+            #line 31 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoService.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(@class.Class));
             
             #line default
             #line hidden
             this.Write("), typeof(");
             
-            #line 31 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoService.tt"
+            #line 31 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoService.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(@class.Class));
             
             #line default
             #line hidden
             this.Write("), ");
             
-            #line 31 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoService.tt"
+            #line 31 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoService.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(lifetime));
             
             #line default
             #line hidden
             this.Write(");\r\n");
             
-            #line 32 "C:\Users\weile\code\SourceGenerator\SourceGenerator.Library\Templates\AutoService.tt"
+            #line 32 "E:\code\SourceGenerator\SourceGenerator.Library\Templates\AutoService.tt"
 
         }
     }

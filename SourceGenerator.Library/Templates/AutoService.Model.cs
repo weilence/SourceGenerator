@@ -1,22 +1,24 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using SourceGenerator.Library.Models;
 
 namespace SourceGenerator.Library.Templates
 {
     partial class AutoService
     {
-        private readonly List<AutoServiceItem> ClassList;
+        private readonly IEnumerable<AutoServiceItem> ClassList;
 
-        public AutoService(List<AutoServiceItem> classList)
+        public AutoService(IEnumerable<AutoServiceItem> classList)
         {
             ClassList = classList;
         }
     }
 
-    public class AutoServiceItem
+    public record AutoServiceItem
     {
         public string Class { get; set; }
 
-        public List<string> Types { get; set; }
+        public ValueArray<string> Types { get; set; }
 
         public string Lifetime { get; set; }
     }

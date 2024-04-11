@@ -1,4 +1,6 @@
-﻿namespace SourceGenerator.Library.Templates
+﻿using System.Linq;
+
+namespace SourceGenerator.Library.Templates
 {
     partial class AutoArgs
     {
@@ -10,9 +12,9 @@
         }
     }
 
-    public class AutoArgsModel : ClassModel
+    public record AutoArgsModel : ClassModel
     {
-        public bool HasBase { get; set; }
-        public bool HasLogger { get; set; }
+        public bool HasBase => Fields.Any(m => m.InBase);
+        public bool HasLogger => Fields.Any(m => m.Name == "_logger");
     }
 }
