@@ -99,6 +99,9 @@ namespace SourceGenerator.Demo
     [Args]
     public partial class UserClass
     {
+        private UserClass() 
+        {
+        }
     }
 }
 ";
@@ -112,7 +115,7 @@ namespace SourceGenerator.Demo
     {
         private readonly ILogger<UserClass> _logger;
 
-        public UserClass(ILogger<UserClass> a0)
+        public UserClass(ILogger<UserClass> a0) : this()
         {
             this._logger = a0;
         }

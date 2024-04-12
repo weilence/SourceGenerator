@@ -116,10 +116,14 @@ namespace SourceGenerator.Library.Generators
                     { Name = fieldSymbol.Name, Type = variableDeclarationSyntax.Type.ToString() });
             }
 
+            var hasBase = false;
             var methodSymbol =
-                namedTypeSymbol.Constructors.FirstOrDefault(m => m.DeclaredAccessibility == Accessibility.Private);
+                namedTypeSymbol.Constructors.FirstOrDefault(m =>
+                    m.DeclaredAccessibility == Accessibility.Private && !m.IsStatic);
             if (methodSymbol != null)
             {
+                hasBase = true;
+
                 foreach (var parameterSymbol in methodSymbol.Parameters)
                 {
                     var parameterSyntax =
@@ -156,6 +160,7 @@ namespace SourceGenerator.Library.Generators
                 Namespace = SyntaxUtils.GetNamespaceName(classDeclarationSyntax),
                 Class = SyntaxUtils.GetName(classDeclarationSyntax),
                 Fields = fields,
+                HasBase = hasBase,
             };
             return model;
         }
@@ -184,7 +189,7 @@ namespace SourceGenerator.Library.Generators
 
         public record AutoArgsModel : ClassModel
         {
-            public bool HasBase => Fields.Any(m => m.InBase);
+            public bool HasBase { get; set; }
             public bool HasLogger => Fields.Any(m => m.Name == "_logger");
         }
 
