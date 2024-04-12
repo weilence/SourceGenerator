@@ -12,6 +12,8 @@ public class AutoArgsGeneratorTest : BaseTest
         var source1 = @"
 using SourceGenerator.Common;
 using System.Collections.Generic;
+using Microsoft.Extensions.Options;
+using Datetime = System.DateTime;
 
 namespace SourceGenerator.Demo
 {
@@ -41,6 +43,8 @@ namespace SourceGenerator.Demo
 
         private readonly int test9 = 0;
 
+        private readonly IOptions<UserClass> _test10;
+
         private UserClass2(UserClass3 test7)
         {
             this._test7 = test7;
@@ -55,6 +59,8 @@ namespace SourceGenerator.Demo
         var expected = @"// Auto-generated code
 using SourceGenerator.Common;
 using System.Collections.Generic;
+using Microsoft.Extensions.Options;
+using Datetime = System.DateTime;
 using Microsoft.Extensions.Logging;
 
 namespace SourceGenerator.Demo
@@ -63,16 +69,17 @@ namespace SourceGenerator.Demo
     {
         private readonly ILogger<UserClass2> _logger;
 
-        public UserClass2(ILogger<UserClass2> a0, UserClass a1, UserClass a2, UserClass a3, UserClass3 a4) : this(a4)
+        public UserClass2(ILogger<UserClass2> a0, UserClass a1, UserClass a2, UserClass a3, IOptions<UserClass> a4, UserClass3 a5) : this(a5)
         {
             this._logger = a0;
             this._test = a1;
             this._test2 = a2;
             this._test3 = a3;
+            this._test10 = a4;
         }
     }
 }
-".ReplaceLineEndings();
+";
 
         var actual = Run<AutoArgsGenerator>(source1);
 
@@ -105,13 +112,13 @@ namespace SourceGenerator.Demo
     {
         private readonly ILogger<UserClass> _logger;
 
-        public UserClass(ILogger<UserClass> logger)
+        public UserClass(ILogger<UserClass> a0)
         {
-            this._logger = logger;
+            this._logger = a0;
         }
     }
 }
-".ReplaceLineEndings();
+";
 
         var actual = Run<AutoArgsGenerator>(source);
 

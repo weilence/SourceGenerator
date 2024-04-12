@@ -1,13 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System.CodeDom.Compiler;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using SourceGenerator.Library.Models;
-using SourceGenerator.Library.Templates;
-using SourceGenerator.Library.Utils;
 
 namespace SourceGenerator.Library.Generators
 {
@@ -85,8 +84,8 @@ namespace SourceGenerator.Library.Generators
             context.RegisterSourceOutput(successProvider,
                 static (sourceOutputContext, data) =>
                 {
-                    sourceOutputContext.AddSource("AutoServiceExtension.Class.g.cs",
-                        new AutoService(data).TransformText());
+                    var code = Write(data);
+                    sourceOutputContext.AddSource("AutoServiceExtension.Class.g.cs", code);
                 });
 
             var pipeline2 = context.SyntaxProvider.ForAttributeWithMetadataName(
@@ -96,6 +95,84 @@ namespace SourceGenerator.Library.Generators
             );
 
             context.RegisterSourceOutput(pipeline2, AutoArgsGenerator.Output);
+        }
+
+        public record AutoServiceItem
+        {
+            public string Class { get; set; }
+
+            public ValueArray<string> Types { get; set; }
+
+            public string Lifetime { get; set; }
+        }
+
+        private static string Write(IEnumerable<AutoServiceItem> model)
+        {
+            var sw = new StringWriter();
+            var writer = new IndentedTextWriter(sw);
+            writer.WriteLine("""
+                             // Auto-generated code
+                             using System;
+
+                             namespace Microsoft.Extensions.DependencyInjection
+                             {
+                                 public static class AutoServiceExtension
+                                 {
+                                     public static IServiceCollection AddAutoServices(this IServiceCollection services, ServiceLifetime lifetime = ServiceLifetime.Singleton)
+                                     {
+                             """);
+            writer.Indent += 3;
+
+            foreach (var @class in model)
+            {
+                var lifetime = "lifetime";
+                if (@class.Lifetime != null)
+                {
+                    lifetime = @class.Lifetime;
+                }
+
+                if (@class.Types.Count > 0)
+                {
+                    foreach (var type in @class.Types)
+                    {
+                        writer.WriteLine($"AddService(services, {type}, typeof({@class.Class}), {lifetime});");
+                    }
+                }
+                else
+                {
+                    writer.WriteLine(
+                        $"AddService(services, typeof({@class.Class}), typeof({@class.Class}), {lifetime});");
+                }
+            }
+
+            writer.Indent -= 3;
+            writer.WriteLine("""
+                                         return services;
+                                     }
+                             
+                                     private static void AddService(IServiceCollection services, Type serviceType, Type implementationType, ServiceLifetime lifetime)
+                                     {
+                                         switch (lifetime)
+                                         {
+                                             case ServiceLifetime.Singleton:
+                                                 services.AddSingleton(serviceType, implementationType);
+                                                 break;
+                                             case ServiceLifetime.Scoped:
+                                                 services.AddScoped(serviceType, implementationType);
+                                                 break;
+                                             case ServiceLifetime.Transient:
+                                                 services.AddTransient(serviceType, implementationType);
+                                                 break;
+                                             default:
+                                                 throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+                                         }
+                                     }
+                                 }
+                             }
+                             """);
+
+
+            return sw.ToString();
         }
     }
 }

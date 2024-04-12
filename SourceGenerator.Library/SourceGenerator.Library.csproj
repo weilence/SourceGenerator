@@ -18,57 +18,10 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.6.0" PrivateAssets="all"/>
         <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all"/>
-        <PackageReference Include="System.CodeDom" Version="8.0.0" PrivateAssets="all"/>
-        <PackageReference Include="System.Text.Json" Version="7.0.3" PrivateAssets="all" GeneratePathProperty="true" />
+        <PackageReference Include="System.Text.Json" Version="7.0.3" PrivateAssets="all" GeneratePathProperty="true"/>
 
         <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
-        <None Include="$(PkgSystem_Text_Json)\lib\netstandard2.0\*.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Compile Update="Templates\AutoProperty.cs">
-            <AutoGen>True</AutoGen>
-            <DesignTime>True</DesignTime>
-            <DependentUpon>AutoProperty.tt</DependentUpon>
-        </Compile>
-        <Compile Update="Templates\AutoOptions.cs">
-            <AutoGen>True</AutoGen>
-            <DesignTime>True</DesignTime>
-            <DependentUpon>AutoOptions.tt</DependentUpon>
-        </Compile>
-        <Compile Update="Templates\AutoArgs.cs">
-            <AutoGen>True</AutoGen>
-            <DesignTime>True</DesignTime>
-            <DependentUpon>AutoArgs.tt</DependentUpon>
-        </Compile>
-        <Compile Update="Templates\AutoService.cs">
-            <AutoGen>True</AutoGen>
-            <DesignTime>True</DesignTime>
-            <DependentUpon>AutoService.tt</DependentUpon>
-        </Compile>
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Update="Templates\AutoProperty.tt">
-            <Generator>TextTemplatingFilePreprocessor</Generator>
-            <LastGenOutput>AutoProperty.cs</LastGenOutput>
-        </None>
-        <None Update="Templates\AutoOptions.tt">
-            <Generator>TextTemplatingFilePreprocessor</Generator>
-            <LastGenOutput>AutoOptions.cs</LastGenOutput>
-        </None>
-        <None Update="Templates\AutoArgs.tt">
-            <Generator>TextTemplatingFilePreprocessor</Generator>
-            <LastGenOutput>AutoArgs.cs</LastGenOutput>
-        </None>
-        <None Update="Templates\AutoService.tt">
-            <Generator>TextTemplatingFilePreprocessor</Generator>
-            <LastGenOutput>AutoService.cs</LastGenOutput>
-        </None>
+        <None Include="$(PkgSystem_Text_Json)\lib\netstandard2.0\*.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
     </ItemGroup>
 
 </Project>

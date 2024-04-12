@@ -1,4 +1,5 @@
-﻿using SourceGenerator.Common;
+﻿using Microsoft.Extensions.Options;
+using SourceGenerator.Common;
 
 namespace SourceGenerator.Demo;
 
@@ -7,9 +8,11 @@ namespace SourceGenerator.Demo;
 public partial class AutoArgsClass : IAutoArgsClass
 {
     private readonly AutoServiceClass _autoServiceClass;
+    [Ignore] private readonly AppSettings _appSettings;
 
-    private AutoArgsClass(AutoServiceClass autoServiceClass)
+    private AutoArgsClass(IOptions<AppSettings> appSettings)
     {
+        this._appSettings = appSettings.Value;
     }
 }
 

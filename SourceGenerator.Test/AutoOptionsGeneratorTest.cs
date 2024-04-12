@@ -37,7 +37,7 @@ namespace compilation
         public string Test41 { get; set; }
     }
 }
-".ReplaceLineEndings();
+";
 
         var actual = Run<AutoOptionsGenerator>(source);
 

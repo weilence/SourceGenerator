@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using SourceGenerator.Library.Models;
 
 namespace SourceGenerator.Library.Utils
 {
@@ -51,10 +52,14 @@ namespace SourceGenerator.Library.Utils
                 .FirstOrDefault(m => func(m.Name.ToString()));
         }
 
-        public static List<string> GetUsings(ClassDeclarationSyntax classDeclarationSyntax)
+        public static List<Using> GetUsings(SyntaxTree syntaxTree)
         {
-            var compilationUnitSyntax = classDeclarationSyntax.SyntaxTree.GetRoot() as CompilationUnitSyntax;
-            var usings = compilationUnitSyntax.Usings.Select(m => m.ToString()).ToList();
+            var compilationUnitSyntax = syntaxTree.GetRoot() as CompilationUnitSyntax;
+            var usings = compilationUnitSyntax.Usings.Select(m => new Using()
+            {
+                Name = m.Name?.ToString(),
+                Alias = m.Alias?.ToString()
+            }).ToList();
             return usings;
         }
 

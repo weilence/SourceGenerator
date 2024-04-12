@@ -77,7 +77,7 @@ namespace Microsoft.Extensions.DependencyInjection
         }
     }
 }
-".ReplaceLineEndings();
+";
         var actual = Run<AutoServiceGenerator>(source);
 
         Assert.Equal(expected, actual[1]);
@@ -138,7 +138,7 @@ namespace Microsoft.Extensions.DependencyInjection
         }
     }
 }
-".ReplaceLineEndings();
+";
 
         var actual = Run<AutoServiceGenerator>(source);
 

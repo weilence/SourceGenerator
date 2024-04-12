@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System.CodeDom.Compiler;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -6,7 +8,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using SourceGenerator.Library.Models;
-using SourceGenerator.Library.Templates;
 using SourceGenerator.Library.Utils;
 
 namespace SourceGenerator.Library.Generators
@@ -72,15 +73,14 @@ namespace SourceGenerator.Library.Generators
                 return model;
             }
 
-            var usings = SyntaxUtils.GetUsings(classDeclarationSyntax);
-            var fields = new List<Field>();
-
             var namedTypeSymbol = (INamedTypeSymbol)context.TargetSymbol;
+            var usings = SyntaxUtils.GetUsings(context.TargetNode.SyntaxTree);
+            var fields = new List<Field>();
             var hasLogger = namedTypeSymbol.GetAttributes().Any(m =>
                 m.AttributeClass!.ToString() == "SourceGenerator.Common.LoggerAttribute");
             if (hasLogger)
             {
-                usings.Add("using Microsoft.Extensions.Logging;");
+                usings.Add("Microsoft.Extensions.Logging");
                 fields.Add(new Field()
                 {
                     Type = "ILogger<" + namedTypeSymbol.Name + ">",
@@ -98,15 +98,22 @@ namespace SourceGenerator.Library.Generators
 
             foreach (var fieldSymbol in fieldSymbols)
             {
-                var syntaxNode = fieldSymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
-                var initializer = syntaxNode!.DescendantNodes().OfType<EqualsValueClauseSyntax>().FirstOrDefault();
-
-                if (initializer != null)
+                var syntaxNodes = fieldSymbol.DeclaringSyntaxReferences
+                    .Select(m => m.GetSyntax())
+                    .OfType<VariableDeclaratorSyntax>()
+                    .ToList();
+                if (syntaxNodes.Any(m => m.Initializer != null))
                 {
                     continue;
                 }
 
-                fields.Add(new Field() { Name = fieldSymbol.Name, Type = fieldSymbol.Type.Name });
+                if (syntaxNodes.FirstOrDefault()?.Parent is not VariableDeclarationSyntax variableDeclarationSyntax)
+                {
+                    continue;
+                }
+
+                fields.Add(new Field()
+                    { Name = fieldSymbol.Name, Type = variableDeclarationSyntax.Type.ToString() });
             }
 
             var methodSymbol =
@@ -115,8 +122,14 @@ namespace SourceGenerator.Library.Generators
             {
                 foreach (var parameterSymbol in methodSymbol.Parameters)
                 {
-                    var type = parameterSymbol.Type.Name;
+                    var parameterSyntax =
+                        parameterSymbol.DeclaringSyntaxReferences.FirstOrDefault().GetSyntax() as ParameterSyntax;
+                    if (parameterSyntax?.Type == null)
+                    {
+                        continue;
+                    }
 
+                    var type = parameterSyntax.Type.ToString();
                     var field = fields.FirstOrDefault(m => m.Type == type);
                     if (field != null)
                     {
@@ -165,8 +178,108 @@ namespace SourceGenerator.Library.Generators
             }
 
             var data = model.Data;
-            sourceOutputContext.AddSource($"{data.Namespace}.{data.Class}.g.cs",
-                new AutoArgs(data).TransformText());
+            var code = Write(data);
+            sourceOutputContext.AddSource($"{data.Namespace}.{data.Class}.g.cs", code);
+        }
+
+        public record AutoArgsModel : ClassModel
+        {
+            public bool HasBase => Fields.Any(m => m.InBase);
+            public bool HasLogger => Fields.Any(m => m.Name == "_logger");
+        }
+
+        public static string Write(AutoArgsModel model)
+        {
+            var sw = new StringWriter();
+            var writer = new IndentedTextWriter(sw);
+            writer.WriteLine("// Auto-generated code");
+            foreach (var item in model.Usings)
+            {
+                writer.WriteLine(string.IsNullOrEmpty(item.Alias)
+                    ? $"using {item.Name};"
+                    : $"using {item.Alias} {item.Name};");
+            }
+
+            writer.WriteLineNoTabs("");
+            writer.WriteLine($"namespace {model.Namespace}");
+            writer.WriteLine("{");
+            writer.Indent++;
+            writer.WriteLine($"public partial class {model.Class}");
+            writer.WriteLine("{");
+            writer.Indent++;
+            if (model.HasLogger)
+            {
+                writer.WriteLine($"private readonly ILogger<{model.Class}> _logger;");
+                writer.WriteLineNoTabs("");
+            }
+
+            writer.WriteLine($"public {model.Class}({WriteParameters(model)}){WriteInitializer(model)}");
+            writer.WriteLine("{");
+            writer.Indent++;
+            for (var i = 0; i < model.Fields.Count; i++)
+            {
+                var field = model.Fields[i];
+                if (field.Ignore)
+                {
+                    continue;
+                }
+
+                writer.WriteLine($"this.{field.Name} = a{i};");
+            }
+
+            writer.Indent--;
+            writer.WriteLine("}");
+            writer.Indent--;
+            writer.WriteLine("}");
+            writer.Indent--;
+            writer.WriteLine("}");
+
+            return sw.ToString();
+        }
+
+        private static string WriteParameters(AutoArgsModel model)
+        {
+            var sb = new StringBuilder();
+            for (var i = 0; i < model.Fields.Count; i++)
+            {
+                var field = model.Fields[i];
+                sb.Append(field.Type);
+                sb.Append(" a");
+                sb.Append(i);
+
+                if (i < model.Fields.Count - 1)
+                {
+                    sb.Append(", ");
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        private static string WriteInitializer(AutoArgsModel model)
+        {
+            if (!model.HasBase)
+            {
+                return "";
+            }
+
+            var sb = new StringBuilder();
+            sb.Append(" : this(");
+            for (var i = 0; i < model.Fields.Count; i++)
+            {
+                var field = model.Fields[i];
+                if (!field.InBase) continue;
+                sb.Append("a");
+                sb.Append(i);
+                if (i < model.Fields.Count - 1)
+                {
+                    sb.Append(", ");
+                }
+            }
+
+            sb.Append(")");
+
+            return sb.ToString();
         }
     }
 }
