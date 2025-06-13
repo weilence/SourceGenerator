@@ -1,99 +1,178 @@
-﻿using System.Collections.Generic;
+﻿using System.CodeDom.Compiler;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using SourceGenerator.Common;
-using SourceGenerator.Library.Templates;
-using SourceGenerator.Library.Utils;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Text;
+using SourceGenerator.Library.Models;
 
 namespace SourceGenerator.Library.Generators
 {
     [Generator]
-    public class AutoServiceGenerator : BaseGenerator
+    public class AutoServiceGenerator : IIncrementalGenerator
     {
-        private readonly List<AutoServiceItem> classList = new List<AutoServiceItem>();
-
-        public AutoServiceGenerator() : base(new[]
+        public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-            nameof(ServiceAttribute),
-            ServiceAttribute.Name,
-        })
-        {
-        }
-
-        protected override void Execute(GeneratorExecutionContext context, AttributeSyntax attributeSyntax)
-        {
-            var classDeclarationSyntax = attributeSyntax.FirstAncestorOrSelf<ClassDeclarationSyntax>();
-            if (classDeclarationSyntax == null)
+            context.RegisterPostInitializationOutput(static postInitializationContext =>
             {
-                return;
-            }
+                postInitializationContext.AddSource("ServiceAttribute.cs", SourceText.From("""
+                    using System;
+                    using Microsoft.Extensions.DependencyInjection;
 
-            var baseNamespaceDeclarationSyntax =
-                classDeclarationSyntax.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>();
-            var namespaceName = SyntaxUtils.GetName(baseNamespaceDeclarationSyntax);
-            var className = SyntaxUtils.GetName(classDeclarationSyntax);
-
-            var semanticModel = context.Compilation.GetSemanticModel(classDeclarationSyntax.SyntaxTree);
-
-            var modelItem = new AutoServiceItem()
-            {
-                Class = namespaceName + "." + className, Types = new List<string>(),
-            };
-
-            var argumentListArguments = attributeSyntax.ArgumentList?.Arguments;
-            if (argumentListArguments != null)
-            {
-                foreach (var argumentSyntax in argumentListArguments)
-                {
-                    var propertyName = SyntaxUtils.GetName(argumentSyntax.NameEquals);
-                    switch (propertyName)
+                    namespace SourceGenerator.Common
                     {
-                        case nameof(ServiceAttribute.Type):
+                        [AttributeUsage(AttributeTargets.Class)]
+                        public class ServiceAttribute : Attribute
                         {
-                            if (argumentSyntax.Expression is TypeOfExpressionSyntax typeOfExpressionSyntax)
+                            public Type[] Types { get; set; }
+                            
+                            public ServiceLifetime Lifetime { get; set; }
+                            
+                            public ServiceAttribute(params Type[] types)
                             {
-                                var type = semanticModel.GetTypeInfo(typeOfExpressionSyntax.Type).Type;
-
-                                if (type != null)
-                                {
-                                    modelItem.Types.Add(type.ToString());
-                                }
+                                Types = types;
                             }
-
-                            break;
-                        }
-                        case nameof(ServiceAttribute.Lifetime):
-                        {
-                            if (argumentSyntax.Expression is MemberAccessExpressionSyntax
-                                memberAccessExpressionSyntax)
-                            {
-                                modelItem.Lifetime = memberAccessExpressionSyntax.ToString();
-                            }
-
-                            break;
                         }
                     }
+                    """, Encoding.UTF8));
+            });
+
+            var pipeline1 = context.SyntaxProvider.ForAttributeWithMetadataName(
+                "SourceGenerator.Common.ServiceAttribute",
+                static (syntaxNode, cancellationToken) => true,
+                static (context, cancellationToken) =>
+                {
+                    var model = new GeneratedModel<AutoServiceItem>();
+                    var data = new AutoServiceItem()
+                    {
+                        Class = context.TargetSymbol.ToString(), Types = new List<string>(),
+                    };
+
+                    var attributeData = context.Attributes.FirstOrDefault();
+                    foreach (var attributeDataConstructorArgument in attributeData.ConstructorArguments)
+                    {
+                        foreach (var value in attributeDataConstructorArgument.Values)
+                        {
+                            data.Types.Add(value.ToCSharpString());
+                        }
+                    }
+
+                    foreach (var argumentSyntax in attributeData.NamedArguments)
+                    {
+                        data.Lifetime = argumentSyntax.Value.ToCSharpString();
+                    }
+
+                    model.Data = data;
+                    return model;
+                }
+            );
+
+            var errorProvider = pipeline1.Where(model => model.HasError);
+            context.RegisterSourceOutput(errorProvider, static (sourceOutputContext, models) =>
+            {
+                foreach (var diagnostic in models.Diagnostics)
+                {
+                    sourceOutputContext.ReportDiagnostic(diagnostic);
+                }
+            });
+
+            var successProvider = pipeline1.Where(model => !model.HasError && model.Data != null)
+                .Select((m, _) => m.Data)
+                .Collect();
+            context.RegisterSourceOutput(successProvider,
+                static (sourceOutputContext, data) =>
+                {
+                    var code = Write(data);
+                    sourceOutputContext.AddSource("AutoServiceExtension.Class.g.cs", code);
+                });
+
+            var pipeline2 = context.SyntaxProvider.ForAttributeWithMetadataName(
+                "SourceGenerator.Common.ServiceAttribute",
+                static (_, _) => true,
+                AutoArgsGenerator.Transform
+            );
+
+            context.RegisterSourceOutput(pipeline2, AutoArgsGenerator.Output);
+        }
+
+        public record AutoServiceItem
+        {
+            public string Class { get; set; }
+
+            public List<string> Types { get; set; }
+
+            public string Lifetime { get; set; }
+        }
+
+        private static string Write(IEnumerable<AutoServiceItem> model)
+        {
+            var sw = new StringWriter();
+            var writer = new IndentedTextWriter(sw);
+            writer.WriteLine("""
+                             // Auto-generated code
+                             using System;
+
+                             namespace Microsoft.Extensions.DependencyInjection
+                             {
+                                 public static class AutoServiceExtension
+                                 {
+                                     public static IServiceCollection AddAutoServices(this IServiceCollection services, ServiceLifetime lifetime = ServiceLifetime.Singleton)
+                                     {
+                             """);
+            writer.Indent += 3;
+
+            foreach (var @class in model)
+            {
+                var lifetime = "lifetime";
+                if (@class.Lifetime != null)
+                {
+                    lifetime = @class.Lifetime;
+                }
+
+                if (@class.Types.Count > 0)
+                {
+                    foreach (var type in @class.Types)
+                    {
+                        writer.WriteLine($"AddService(services, {type}, typeof({@class.Class}), {lifetime});");
+                    }
+                }
+                else
+                {
+                    writer.WriteLine(
+                        $"AddService(services, typeof({@class.Class}), typeof({@class.Class}), {lifetime});");
                 }
             }
 
-            if (modelItem.Types.Count == 0 && classDeclarationSyntax.BaseList != null)
-            {
-                foreach (var baseTypeSyntax in classDeclarationSyntax.BaseList.Types)
-                {
-                    var type = semanticModel.GetTypeInfo(baseTypeSyntax.Type).Type;
-                    if (type != null)
-                    {
-                        modelItem.Types.Add(type.ToString());
-                    }
-                }
-            }
+            writer.Indent -= 3;
+            writer.WriteLine("""
+                                         return services;
+                                     }
+                             
+                                     private static void AddService(IServiceCollection services, Type serviceType, Type implementationType, ServiceLifetime lifetime)
+                                     {
+                                         switch (lifetime)
+                                         {
+                                             case ServiceLifetime.Singleton:
+                                                 services.AddSingleton(serviceType, implementationType);
+                                                 break;
+                                             case ServiceLifetime.Scoped:
+                                                 services.AddScoped(serviceType, implementationType);
+                                                 break;
+                                             case ServiceLifetime.Transient:
+                                                 services.AddTransient(serviceType, implementationType);
+                                                 break;
+                                             default:
+                                                 throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+                                         }
+                                     }
+                                 }
+                             }
+                             """);
 
-            classList.Add(modelItem);
-        }
 
-        protected override void AfterExecute(GeneratorExecutionContext context)
-        {
-            context.AddSource("AutoServiceExtension.Class.g.cs", new AutoService(classList).TransformText());
+            return sw.ToString();
         }
     }
 }

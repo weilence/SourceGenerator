@@ -37,10 +37,10 @@ namespace compilation
         public string Test41 { get; set; }
     }
 }
-".ReplaceLineEndings();
+";
 
         var actual = Run<AutoOptionsGenerator>(source);
 
-        Assert.Equal(expected, actual[0]);
+        Assert.Equal(expected, actual[1]);
     }
 }

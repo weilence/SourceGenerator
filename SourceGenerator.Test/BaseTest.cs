@@ -9,17 +9,20 @@ using Microsoft.CodeAnalysis.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using SourceGenerator.Common;
 
 namespace SourceGenerator.Test;
 
 public abstract class BaseTest
 {
-    public List<string> Run<T>(params string[] sources) where T : ISourceGenerator, new()
+    public List<string> Run<T>(params string[] sources) where T : IIncrementalGenerator, new()
+    {
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new T());
+        return Run(driver, sources);
+    }
+
+    private List<string> Run(GeneratorDriver driver, params string[] sources)
     {
         var inputCompilation = CreateCompilation(sources);
-
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new T());
 
         driver = driver
             .WithUpdatedAnalyzerConfigOptions(
@@ -47,7 +50,7 @@ public abstract class BaseTest
             {
                 if (codes.Count > 0)
                 {
-                    throw new Exception(diagnostic.GetMessage() + "code: \n" + codes[0]);
+                    throw new Exception(diagnostic.GetMessage() + "code: \n" + string.Join("\n", codes));
                 }
                 else
                 {
@@ -75,7 +78,6 @@ public abstract class BaseTest
         var assemblies = ReferenceAssemblies.NetStandard.NetStandard20.ResolveAsync(null, CancellationToken.None)
             .Result.ToList();
         assemblies.Add(MetadataReference.CreateFromFile(typeof(IServiceCollection).Assembly.Location));
-        assemblies.Add(MetadataReference.CreateFromFile(typeof(PropertyAttribute).Assembly.Location));
         assemblies.Add(MetadataReference.CreateFromFile(typeof(IOptions<>).Assembly.Location));
         assemblies.Add(MetadataReference.CreateFromFile(typeof(ILogger<>).Assembly.Location));
 

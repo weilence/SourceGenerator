@@ -1,17 +1,18 @@
-﻿using SourceGenerator.Common;
+﻿using Microsoft.Extensions.Options;
+using SourceGenerator.Common;
 
 namespace SourceGenerator.Demo;
 
 [Logger]
-[Service(Type = typeof(IAutoArgsClass))]
+[Service(typeof(IAutoArgsClass))]
 public partial class AutoArgsClass : IAutoArgsClass
 {
-    private readonly AutoPropertyClass _autoPropertyClass;
     private readonly AutoServiceClass _autoServiceClass;
+    [Ignore] private readonly AppSettings _appSettings;
 
-    private AutoArgsClass(AutoServiceClass autoServiceClass)
+    private AutoArgsClass(IOptions<AppSettings> appSettings)
     {
-        _autoServiceClass = autoServiceClass;
+        this._appSettings = appSettings.Value;
     }
 }
 
